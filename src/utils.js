@@ -37,6 +37,10 @@ Array.prototype.uncamelize = function() {
   return uncamelized
 }
 
+Array.prototype.unique = function() {
+  return [... new Set(this)]
+}
+
 String.prototype.capitalize = function(separator = " ") {
   return this.charAt(0).toUpperCase(0) + this.slice(1);
 }

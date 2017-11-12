@@ -1,9 +1,12 @@
+require('./utils.js')
 const fs = require('fs')
 const path = require('path')
 const util = require('util')
+const config = require('../config.js')
 const PRAGAMA_SOLIDITY_VERSION_REGEX = /^\s*pragma\ssolidity\s+(.*?)\s*;/;
 const SUPPORTED_VERSION_DECLARATION_REGEX = /^\^?\d+(\.\d+){1,2}$/;
 const IMPORT_SOLIDITY_REGEX = /^.*import.*$/mg;
+const tsort = require('tsort')
 
 const readFile = util.promisify(fs.readFile);
 const appendFile = util.promisify(fs.appendFile)
@@ -67,7 +70,6 @@ async function normalizeCompilerVersionDeclarations(files) {
   return maxCaretVersion;
 }
 
-
 async function getFileCompilerVersionDeclaration(fileContents) {
 
   const matched = fileContents.match(PRAGAMA_SOLIDITY_VERSION_REGEX);
@@ -86,14 +88,12 @@ async function getFileCompilerVersionDeclaration(fileContents) {
   return version;
 }
 
-
 function getDirPath(filePath) {
   return filePath.substring(0, filePath.lastIndexOf(path.sep));
 }
 
-
 function getDependencies(filePath, fileContents) {
-  const dependencies = filePath;
+  const dependencies = [];
   let imports;
 
   try {
@@ -104,17 +104,62 @@ function getDependencies(filePath, fileContents) {
     );
   }
 
-  for (var dependency of imports) {
-    dependency = getDirPath(filePath) + path.sep + dependency;
-    dependency = path.normalize(dependency);
+  for (let dependency of imports) {
+    if (dependency.startsWith("./") || dependency.startsWith("../")) {
+      dependency = getDirPath(filePath) + path.sep + dependency;
+      dependency = path.normalize(dependency);
+    }
     dependencies.push(dependency)
   }
 
   return dependencies
 }
 
+async function resolver(filePath) {
 
-async function writeConcatenation(files) {
+  if (!path.isAbsolute(filePath)) {
+    filePath = path.join(process.cwd(), filePath)
+  }
+
+  let fileContents = await readFile(filePath, { encoding: 'utf8'})
+  return {
+    filePath: filePath,
+    fileContents: fileContents
+  }
+}
+
+async function getSortedDependencies(graph, visitedFiles, filePath) {
+  visitedFiles.push(filePath);
+  const file = await resolver(filePath)
+  const dependencies = getDependencies(
+    file.filePath,
+    file.fileContents
+  )
+
+  for (let dependency of dependencies) {
+    graph.add(dependency, filePath)
+    const resolveDependency = await resolver(dependency)
+
+    if (!visitedFiles.includes(dependency)) {
+      await getSortedDependencies(graph, visitedFiles, dependency)
+    }
+  }
+}
+
+async function getSortedFilePaths(files) {
+  const graph = tsort();
+  const visitedFiles = [];
+
+  for (const file of files) {
+    await getSortedDependencies(graph, visitedFiles, file)
+  }
+  const sortedFiles = graph.sort();
+  const sortedFilesWithEntries = sortedFiles.concat(sortedFiles)
+  return sortedFilesWithEntries.unique()
+}
+
+
+async function writeConcatenation(files, filePath) {
   const version = await normalizeCompilerVersionDeclarations(files);
 
   if (version) {
@@ -122,19 +167,22 @@ async function writeConcatenation(files) {
   }
 
   for (const file of files) {
-    console.log("\n//File: " + file + "\n");
     let fileContents = await readFile(file, 'utf-8')
-    let output = fileContents.replace(PRAGAMA_SOLIDITY_VERSION_REGEX, "")
+    fileContents = fileContents.replace(PRAGAMA_SOLIDITY_VERSION_REGEX, "")
                               .replace(IMPORT_SOLIDITY_REGEX, "")
 
-  await appendFile('./FullContract.sol', output)
+    await appendFile(filePath, fileContents)
   }
 }
 
-async function flatten(path) {
-  let content = await readFile(path, 'utf-8')
-  let dependencies = await getDependencies(path, content)
-  await writeConcatenation(dependencies)
+async function flatten(filePath) {
+  let fileName = path.basename(filePath)
+  let outputFilePath = path.join(config.workingDirectory, config.flattenedContractsOutput, fileName)
+
+  filePath = Array(filePath)
+  const sortedFiles = await getSortedFilePaths(filePath)
+
+  await writeConcatenation(sortedFiles, outputFilePath)
 }
 
 module.exports = {
