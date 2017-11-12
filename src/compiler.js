@@ -23,6 +23,7 @@ class Compiler {
   _compileAndClean(filePath) {
     let source = fs.readFileSync(filePath, { encoding: 'utf8'})
     let compiled = solc.compile(source, 1)
+    console.log(compiled)
     let contractName = getContractName(filePath)
     return this._clean(compiled, contractName)
   }

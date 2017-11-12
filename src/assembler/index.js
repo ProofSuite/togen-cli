@@ -7,22 +7,25 @@ const config = require('../../config.js')
 const { MultiSigWalletTemplate } = require('../contracts/templates/index.js')
 const { Generator } = require('../contracts/generator.js')
 
-//TODO replace process.cwd() by fs.path, __dirname and '/../'
-//TODO clean paths and add them to a class ?
+let { getContractBasename } = require('../helpers.js')
+
 //TODO promiseAll instead of sequential awaits
 //TODO delete files upon creation of new smart-contracts
-//TODO only write files that have been selected in configuration
 const assemble = async function(configuration) {
   let generator = new Generator(configuration)
 
   let includedContracts = configuration.getIncludedContracts()
+
   includedContracts.forEach(async function(contract) {
-    await writeFile(process.cwd() + '/src/contracts/solidity/' + contract.capitalize() + '.sol', generator[contract].text)
+    let baseName = getContractBasename(contract)
+    let filePath = path.join(config.outputFolder, baseName)
+    await writeFile(filePath, generator[contract].text)
   })
 
   if (configuration.wallet && configuration.wallet.multisig) {
     let multiSigTemplate = new MultiSigWalletTemplate()
-    await writeFile(process.cwd() + '/src/contracts/solidity/MultiSigWallet.sol', multiSigTemplate.text)
+    let filePath = path.join(config.outputFolder, 'MultiSigWallet.sol')
+    await writeFile(filePath, multiSigTemplate.text)
   }
 }
 

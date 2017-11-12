@@ -8,8 +8,7 @@ const SUPPORTED_VERSION_DECLARATION_REGEX = /^\^?\d+(\.\d+){1,2}$/;
 const IMPORT_SOLIDITY_REGEX = /^.*import.*$/mg;
 const tsort = require('tsort')
 
-const readFile = util.promisify(fs.readFile);
-const appendFile = util.promisify(fs.appendFile)
+let { readFile, appendFile, unlink } = require('./helpers.js')
 
 const SolidityParser = require('solidity-parser');
 
@@ -175,9 +174,10 @@ async function writeConcatenation(files, filePath) {
   }
 }
 
-async function flatten(filePath) {
+async function concatenate(filePath) {
   let fileName = path.basename(filePath)
   let outputFilePath = path.join(config.workingDirectory, config.flattenedContractsOutput, fileName)
+  await unlink(outputFilePath)
 
   filePath = Array(filePath)
   const sortedFiles = await getSortedFilePaths(filePath)
@@ -186,5 +186,5 @@ async function flatten(filePath) {
 }
 
 module.exports = {
-  flatten
+  concatenate
 }

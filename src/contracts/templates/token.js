@@ -35,8 +35,8 @@ contract Token is Controllable {
 
 
   function Token() public {
-      name = ${params.name};
-      symbol = ${params.symbol};
+      name = '${params.name}';
+      symbol = '${params.symbol}';
       decimals = ${params.decimals};
       creationBlock = block.number;
       version = '0.1';

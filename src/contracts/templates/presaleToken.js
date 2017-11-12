@@ -17,8 +17,8 @@ contract PresaleToken is ERC20, Ownable {
   mapping(address => uint) balances;
   mapping (address => mapping (address => uint)) allowed;
 
-  string public constant name = ${params.name};
-  string public constant symbol = ${params.symbol};
+  string public constant name = '${params.name}';
+  string public constant symbol = '${params.symbol}';
   uint8 public constant decimals = ${params.decimals};
   bool public mintingFinished = false;
 
@@ -26,7 +26,6 @@ contract PresaleToken is ERC20, Ownable {
   event MintFinished();
 
   function PresaleToken() {}
-
 
   function() payable {
     revert();

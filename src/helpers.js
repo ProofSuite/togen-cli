@@ -9,6 +9,7 @@ let readdir = util.promisify(fs.readdir)
 let appendFile = util.promisify(fs.appendFile)
 let readFile = util.promisify(fs.readFile)
 let writeFile = util.promisify(fs.writeFile)
+let unlink = util.promisify(fs.unlink)
 
 function toTimestamp(date){
   var timestamp = Date.parse(date);
@@ -49,6 +50,11 @@ async function getContractNames() {
   return contractNames
 }
 
+//TODO differentiate whether the input is absolute, relative, or just a name
+function getContractBasename(file) {
+  return file.capitalize() + '.sol'
+}
+
 //TODO clean
 function getTable(json) {
 
@@ -70,11 +76,13 @@ module.exports = {
   appendFile,
   readFile,
   writeFile,
+  unlink,
   toTimestamp,
   getContractName,
   getContracts,
   getContractNames,
   getContractPaths,
   getContractImports,
+  getContractBasename,
   getTable
 }
