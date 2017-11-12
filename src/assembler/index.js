@@ -3,6 +3,7 @@ const path = require('path')
 const util = require('util')
 const writeFile = util.promisify(fs.writeFile)
 const deleteFile = util.promisify(fs.unlink)
+const config = require('../../config.js')
 const { MultiSigWalletTemplate } = require('../contracts/templates/index.js')
 const { Generator } = require('../contracts/generator.js')
 
