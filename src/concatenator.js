@@ -8,7 +8,7 @@ const SUPPORTED_VERSION_DECLARATION_REGEX = /^\^?\d+(\.\d+){1,2}$/;
 const IMPORT_SOLIDITY_REGEX = /^.*import.*$/mg;
 const tsort = require('tsort')
 
-let { readFile, appendFile, unlink } = require('./helpers.js')
+let { readFile, appendFile, deleteFile } = require('./helpers.js')
 
 const SolidityParser = require('solidity-parser');
 
@@ -157,7 +157,6 @@ async function getSortedFilePaths(files) {
   return sortedFilesWithEntries.unique()
 }
 
-
 async function writeConcatenation(files, filePath) {
   const version = await normalizeCompilerVersionDeclarations(files);
 
@@ -176,8 +175,8 @@ async function writeConcatenation(files, filePath) {
 
 async function concatenate(filePath) {
   let fileName = path.basename(filePath)
-  let outputFilePath = path.join(config.workingDirectory, config.flattenedContractsOutput, fileName)
-  await unlink(outputFilePath)
+  let outputFilePath = path.join(config.flattenedContractsOutput, fileName)
+  await deleteFile(outputFilePath)
 
   filePath = Array(filePath)
   const sortedFiles = await getSortedFilePaths(filePath)

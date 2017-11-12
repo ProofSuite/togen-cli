@@ -7,6 +7,20 @@ const categories = {
   choices: ['Configure Contracts', 'Display Contract Configuration', 'Build Contracts', 'Compile Contracts', 'Help', 'Close']
 }
 
+const configurationMenu = {
+  type: 'list',
+  name: 'choice',
+  message: 'Select Action',
+  choices: ['New Configuration', 'Display Current Configuration', 'Load Previous Configuration', 'Save Configuration', 'Back']
+}
+
+const compilerMenu = {
+  type: 'list',
+  name: 'choice',
+  message: 'Select Action',
+  choices: ['Compile All Contracts', 'Compile Contract', 'Print Bytecode', 'Print ABI', 'Copy Bytecode to clipboard', 'Copy API to clipboard']
+}
+
 const returnToMenu = {
   type: 'list',
   name: 'choice',
@@ -150,6 +164,8 @@ module.exports = {
   presale,
   wallet,
   categories,
+  compilerMenu,
+  configurationMenu,
   contractList,
   contractCheckboxList,
   contractOptionsList,

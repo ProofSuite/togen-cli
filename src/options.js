@@ -95,6 +95,8 @@ class WalletOptions {
 
 }
 
+
+//TODO split this file in two: options on one and configuration in the other file called configuration.js (+ change the corresponding imports)
 class Configuration {
 	constructor(contracts = [], tokenOptions = {}, tokenSaleOptions = {}, walletOptions = {}, presaleTokenOptions = {}, presaleOptions = {}) {
 		this.token = new TokenOptions(tokenOptions)

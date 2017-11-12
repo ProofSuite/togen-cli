@@ -4,6 +4,7 @@ const questions = require('./src/questions')
 const command = require('inquirer')
 const clear = require('clear')
 const Table = require('cli-table2')
+const config = require('./config.js')
 
 
 const { assemble } = require('./src/assembler/index.js')
@@ -14,23 +15,22 @@ const { getContractNames, getTable } = require('./src/helpers.js')
 command.registerPrompt('datetime', require('inquirer-datepicker-prompt'))
 
 let configuration = new Configuration()
-let compiler = new Compiler('./')
-
+let compiler = new Compiler(config.artifactsFolder)
 
 main()
 
 function main() {
-	displayMenu();
+	displayMainMenu();
 }
 
 //TODO refactor and create a separate display module
-async function displayMenu() {
-  // clear();
+async function displayMainMenu() {
+  //// clear();
   console.log('Welcome to the tokensale generator. Please select among the options below to choose your tokensale options')
   let options = await command.prompt(questions.categories)
 
   if (options.choice === 'Configure Contracts') {
-    await displayContractSelectionMenu();
+    await displayConfigurationMenu();
   }
 	else if (options.choice === 'Display Contract Configuration') {
     displayCurrentConfiguration();
@@ -38,11 +38,11 @@ async function displayMenu() {
 	}
 	else if (options.choice === 'Build Contracts') {
 		await assembleContracts(configuration)
-		displayMenu();
+		displayMainMenu();
 	}
 	else if (options.choice === 'Compile Contracts') {
-		await compileContracts(configuration)
-		displayMenu();
+    await displayCompilerMenu()
+		displayMainMenu();
 	}
 	else if (options.choice === 'Close') {
 		process.exit();
@@ -50,7 +50,30 @@ async function displayMenu() {
 	else if (options.choice === 'Help') {
 		displayHelp();
   }
+}
 
+
+async function displayConfigurationMenu() {
+  let options = await command.prompt(questions.configurationMenu)
+
+  if (options.choice === 'New Configuration') {
+    await displayContractSelectionMenu();
+  }
+  else if (options.choice === 'Display Current Configuration') {
+    displayCurrentConfiguration();
+    await displayReturnToConfigurationMenu();
+  }
+  else if (options.choice === 'Save Configuration') {
+    configuration.saveConfiguration()
+    await displayReturnToConfigurationMenu();
+  }
+  else if (options.choice === 'Load Previous Configuration') {
+    configuration.loadConfiguration()
+    await displayReturnToConfigurationMenu();
+  }
+  else if (options.choice === 'Back') {
+    displayMainMenu();
+  }
 }
 
 
@@ -67,25 +90,11 @@ async function displayContractSelectionMenu() {
   await displayContractConfigurationMenu()
 }
 
-async function displayReturnToMainMenu() {
-  let options = await command.prompt(questions.returnToMenu)
-  displayMenu();
-}
-
-async function displayReturnToConfigurationMenu() {
-  let options = await command.prompt(questions.returnToMenu)
-  clear();
-  displayContractConfigurationMenu();
-}
-
-
 
 async function displayContractConfigurationMenu() {
 
   let optionsList = configuration.getIncludedContracts().uncamelize()
   optionsList.push('Display Contract Configuration')
-  optionsList.push('Save Configuration')
-  optionsList.push('Load Previous Configuration')
   optionsList.push('Go to main menu')
 
   let menu = questions.contractOptionsList(optionsList)
@@ -108,21 +117,12 @@ async function displayContractConfigurationMenu() {
   }
   else if (options.choice === 'Display Contract Configuration') {
     displayCurrentConfiguration();
-    await displayReturnToConfigurationMenu();
-  }
-  else if (options.choice === 'Save Configuration') {
-    configuration.saveConfiguration()
-    await displayReturnToConfigurationMenu();
-  }
-  else if (options.choice === 'Load Previous Configuration') {
-    configuration.loadConfiguration()
-    await displayReturnToConfigurationMenu();
+    await displayReturnToContractConfigurationMenu();
   }
   else if (options.choice === 'Go to main menu') {
-    displayMenu();
+    displayMainMenu();
   }
 }
-
 
 async function displayTokenMenu() {
   clear();
@@ -164,7 +164,41 @@ async function displayPresaleTokenMenu() {
   await displayContractConfigurationMenu()
 }
 
+async function displayCompilerMenu() {
+  let options = await command.prompt(questions.compilerMenu)
 
+  if (options.choice === 'Compile All Contracts') {
+    let contracts = configuration.getIncludedContracts()
+    await compiler.compileAll(contracts)
+    console.log("Contracts have been written to your root folder")
+    await displayReturnToMainMenu();
+  }
+  else if (options.choice === 'Compile Contract') {
+    let choice = await displayContractMenu()
+    await compiler.compile(choice)
+    console.log("Contracts have been written to your root folder")
+    await displayReturnToMainMenu();
+  }
+  else if (options.choice === 'Print Bytecode') {
+    let choice = await displayContractMenu()
+    let bytecode = await compiler.getByteCode(choice)
+    console.log(bytecode)
+    await displayReturnToMainMenu();
+  }
+  else if (options.choice === 'Print ABI') {
+    let choice = await displayContractMenu()
+    let ABI = await compiler.getABI(choice)
+    console.log(ABI)
+    await displayReturnToMainMenu();
+  }
+}
+
+async function displayContractMenu() {
+  let optionsList = configuration.getIncludedContracts().uncamelize()
+  let menu = questions.contractOptionsList(optionsList)
+  let options = await command.prompt(menu)
+  return options.choice
+}
 
 
 //TODO put colors on the title display
@@ -181,7 +215,6 @@ function displayCurrentConfiguration() {
   })
 }
 
-
 //TODO change the folder where the contract will be written
 //TODO add errors depending on outcome
 async function assembleContracts(configuration) {
@@ -192,27 +225,6 @@ async function assembleContracts(configuration) {
   await displayReturnToMainMenu();
 }
 
-async function compileContracts(configuration) {
-	console.log("\n********************\n")
-	console.log("Contract compilation module\n")
-	console.log("This feature is not implemented yet")
-  console.log("\n")
-  await displayReturnToMainMenu();
-}
-
-async function compileOneContract() {
-  let contractFiles = await getContracts()
-  let contracts = contractList(contractFiles)
-  let selectedContract = await command.prompt(contracts)
-
-  await compiler.saveContract(selectedContract)
-  console.log("The contract has been written to your folder")
-}
-
-async function compileAllContracts() {
-  await compile.compileAllContracts()
-  console.log("Contracts have been written to your root folder")
-}
 
 async function getContractABI(contract) {
   let contractFiles = await getContracts()
@@ -233,6 +245,24 @@ async function getContractBytecode() {
 function displayHelp() {
 	console.log('The help section has not been created yet.')
 }
+
+async function displayReturnToMainMenu() {
+  let options = await command.prompt(questions.returnToMenu)
+  displayMainMenu();
+}
+
+async function displayReturnToConfigurationMenu() {
+  let options = await command.prompt(questions.returnToMenu)
+  clear();
+  displayConfigurationMenu();
+}
+
+async function displayReturnToContractConfigurationMenu() {
+  let options = await command.prompt(questions.returnToMenu)
+  clear();
+  displayContractConfigurationMenu()
+}
+
 
 
 

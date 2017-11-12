@@ -1,7 +1,7 @@
 const fs = require('fs')
 const util = require('util')
 const path = require('path')
-const { config } = require('../config.js')
+const config = require('../config.js')
 const SolidityParser = require('solidity-parser')
 const Table = require('cli-table2')
 
@@ -10,6 +10,15 @@ let appendFile = util.promisify(fs.appendFile)
 let readFile = util.promisify(fs.readFile)
 let writeFile = util.promisify(fs.writeFile)
 let unlink = util.promisify(fs.unlink)
+
+
+async function deleteFile(filePath) {
+  fs.stat(filePath, async function(err, stat) {
+    if(err == null) {
+      await unlink(filePath)
+    }
+  })
+};
 
 function toTimestamp(date){
   var timestamp = Date.parse(date);
@@ -20,39 +29,76 @@ function getContractName(filePath) {
 	return path.basename(filePath, '.sol')
 }
 
+
+//TODO take into account whether or not the contract name is camelized or not
 function getContractPath(contractName) {
-  return config.contractsFolder + contractName + '.sol'
+  let baseName = getContractBasename(contractName)
+  return path.join(config.outputFolder, baseName)
+  return config.outputFolder + contractName + '.sol'
+}
+
+function getFlattenedContractPath(contractName) {
+  let baseName = getContractBasename(contractName)
+  return path.join(config.flattenedContractsOutput, baseName)
 }
 
 async function getContracts() {
-  let contracts = await readdir(config.contractsFolder)
+  let contracts = await readdir(config.outputFolder)
   return contracts
 }
 
+function getArtifactPath(contractName) {
+  let baseName = contractName.camelize().capitalize() + '.json'
+  let filePath = path.join(config.artifactsFolder, baseName)
+  return filePath
+}
+
+
+
+function filterSolidityFiles(files) {
+  return files.filter((file) => { return path.extname(file) === '.sol' })
+}
+
 async function getContractPaths() {
-  let contracts = await readdir(config.contractsFolder)
+  let files = await readdir(config.outputFolder)
+  let contracts = filterSolidityFiles(files)
+
   let contractPaths = contracts.map(function(contract) {
-    return config.contractsFolder + contract
+    return config.outputFolder + contract
   })
+
   return contractPaths
 }
 
+async function getFlattenedContractPaths() {
+  let files = await readdir(config.flattenedContractsOutput)
+  let contracts = filterSolidityFiles(files)
+
+  let contractPaths = contracts.map(function(contract) {
+    return config.flattenedContractsOutput + contract
+  })
+
+  return contractPaths
+}
+
+
+
 async function getContractImports(contractName) {
-  let fileContents = await readFile(config.contractsFolder + contractName, 'utf-8')
+  let fileContents = await readFile(config.outputFolder + contractName, 'utf-8')
   let imports = SolidityParser.parse(fileContents, "imports")
   return imports
 }
 
 //TODO check for string and proper format
 async function getContractNames() {
-  let contracts = await readdir(config.contractsFolder)
+  let contracts = await readdir(config.outputFolder)
   let contractNames = contracts.map((contract) => { return contract.substring(0, contract.length-4)})
   return contractNames
 }
 
 //TODO differentiate whether the input is absolute, relative, or just a name
 function getContractBasename(file) {
-  return file.capitalize() + '.sol'
+  return file.camelize().capitalize() + '.sol'
 }
 
 //TODO clean
@@ -82,7 +128,12 @@ module.exports = {
   getContracts,
   getContractNames,
   getContractPaths,
+  getContractPath,
   getContractImports,
   getContractBasename,
-  getTable
+  getFlattenedContractPath,
+  getFlattenedContractPaths,
+  getArtifactPath,
+  getTable,
+  deleteFile
 }

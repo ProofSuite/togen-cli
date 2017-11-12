@@ -4,12 +4,11 @@ const workingDirectory = process.cwd()
 //TODO turn all the paths into absolute paths by join with process.cwd()
 const config = {
   workingDirectory: workingDirectory,
-  contractsFolder: './src/assembler/contracts/',
   contractConfiguration: './src/contracts/configuration.json',
-  flattenedContractsOutput: './src/contracts/solidity/flattened_contracts',
+  flattenedContractsOutput: path.join(workingDirectory, './src/contracts/solidity/flattened_contracts'),
   templatesFolder: './src/contracts/templates/',
   outputFolder: path.join(workingDirectory, './src/contracts/solidity/'),
-  compilerOutputFolder: path.join(workingDirectory, './src/contracts/output'),
+  artifactsFolder: path.join(workingDirectory, './src/contracts/json')
 }
 
 module.exports = config
