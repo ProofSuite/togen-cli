@@ -57,3 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
+# solidity working files
+src/contracts/solidity/*.sol
+
