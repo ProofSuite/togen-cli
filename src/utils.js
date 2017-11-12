@@ -30,9 +30,13 @@ String.prototype.uncamelize = function(separator = " ") {
   text = text.replace(/[A-Z]/g,  (letter) => separator + letter.toUpperCase()).replace("/^" + separator + "/", '');
   text = text.charAt(0).toUpperCase(0) + text.slice(1);
   return text;
- }
+}
 
- Array.prototype.uncamelize = function() {
+Array.prototype.uncamelize = function() {
   let uncamelized = this.map((element) => { return element.uncamelize() })
   return uncamelized
+}
+
+String.prototype.capitalize = function(separator = " ") {
+  return this.charAt(0).toUpperCase(0) + this.slice(1);
 }
