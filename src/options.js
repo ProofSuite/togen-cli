@@ -2,7 +2,7 @@ let h = require('./helpers.js')
 
 class TokenOptions {
 
-	constructor({decimals = 18, symbol = '', name = ''}) {
+	constructor({decimals, symbol, name}) {
 
 		this.decimals = decimals;
 		this.symbol = symbol;

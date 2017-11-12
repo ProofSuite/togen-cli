@@ -8,6 +8,7 @@ const config = {
 
 
 const testContractConfiguration = {
+  contracts: ['token', 'tokenSale', 'presaleToken', 'presale', 'wallet'],
   token: {
     decimals: 18,
     symbol: 'DVE',
