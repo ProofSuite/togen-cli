@@ -11,7 +11,7 @@ const returnToMenu = {
   type: 'list',
   name: 'choice',
   message: ' ',
-  choices: ['Go back to main menu']
+  choices: ['Go back']
 }
 
 //TODO replace validator.isPositiveNumber by validator.isDecimals (which is somehow not working)

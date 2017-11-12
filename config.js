@@ -1,9 +1,10 @@
 //TODO standardize paths for windows, mac, linux
 const config = {
   contractsFolder: './src/assembler/contracts/',
+  contractConfiguration: './src/contracts/configuration.json',
   templatesFolder: './src/contracts/templates/',
   outputFolder: './src/contracts/solidity/',
-  compilerOutputFolder: './src/contracts/output'
+  compilerOutputFolder: './src/contracts/output',
 }
 
 

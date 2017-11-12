@@ -1,4 +1,8 @@
+require('./utils.js')
 let h = require('./helpers.js')
+let { isSet } = require('./validators.js')
+let validator = require('./validators.js')
+
 
 class TokenOptions {
 
@@ -10,13 +14,20 @@ class TokenOptions {
   }
 
   isComplete() {
-    if (this.decimals && this.symbol && this.name) {
+    try {
+      if (!validator.isValidDecimals(this.decimals)) {
+        return false
+      } else if (!validator.isValidSymbol(this.symbol)) {
+        return false
+      } else if (!validator.isValidName(this.name)) {
+        return false
+      }
       return true
-    } else {
+    }
+    catch(error) {
       return false
     }
   }
-
 }
 
 class TokenSaleOptions {
@@ -30,7 +41,16 @@ class TokenSaleOptions {
   }
 
   isComplete() {
-    return (this.cap && this.tokenPrice && this.startDate && this.endDate && this.wallet)
+    try {
+      if (!validator.isPositiveNumber(this.cap)) {
+        return false
+      } else if (!validator.isPositiveNumber(this.tokenPrice)) {
+        return false
+      }
+      return true
+    } catch (error) {
+      return false
+    }
   }
 
 }
@@ -45,7 +65,21 @@ class PresaleOptions {
   }
 
   isComplete() {
-    return (this.wallet && this.rate && this.minInvestment && this.cap)
+    try {
+      if (!validator.isValidAddress(this.address)) {
+        return false
+      } else if (!validator.isPositiveNumber(this.rate)) {
+        return false
+      } else if (!validator.isPositiveNumber(this.minInvestment)) {
+        return false
+      } else if (!validator.isPositiveNumber(this.cap)) {
+        return false
+      }
+
+      return true
+    } catch (error) {
+      return false
+    }
   }
 }
 
@@ -62,47 +96,114 @@ class WalletOptions {
 }
 
 class Configuration {
-	constructor(tokenOptions = {}, tokenSaleOptions = {}, walletOptions = {}, presaleTokenOptions = {}, presaleOptions = {}) {
+	constructor(contracts = [], tokenOptions = {}, tokenSaleOptions = {}, walletOptions = {}, presaleTokenOptions = {}, presaleOptions = {}) {
 		this.token = new TokenOptions(tokenOptions)
     this.tokenSale = new TokenSaleOptions(tokenSaleOptions)
     this.presaleToken = new TokenOptions(presaleTokenOptions)
     this.presale = new PresaleOptions(presaleOptions)
-		this.wallet = new WalletOptions(walletOptions)
+    this.wallet = new WalletOptions(walletOptions)
+
+    this.includedContracts = {
+      token: tokenOptions.isSet(),
+      tokenSale: tokenSaleOptions.isSet(),
+      presaleToken: presaleTokenOptions.isSet(),
+      presale: presaleOptions.isSet()
+    }
+  }
+
+  getContracts() {
+    return Object.keys(this.includedContracts)
+  }
+
+  getIncludedContracts() {
+    let isTrue = function(value) { return (value == true) }
+    let contracts = this.includedContracts.filterValues(isTrue)
+    return Object.keys(contracts)
+  }
+
+  setIncludedContracts(values) {
+    let contracts = this.getContracts()
+    let includedContracts = values.camelize()
+
+    contracts.forEach((contract) => {
+      if (includedContracts.indexOf(contract) != -1) {
+        this.includedContracts[contract] = true
+      } else {
+        this.includedContracts[contract] = false
+      }
+    })
+  }
+
+  isValid() {
+    let contracts = this.getIncludedContracts().camelize()
+    let valid = true;
+    contracts.forEach((contract) => {
+      if (!this[contract].isComplete()) {
+        valid = false;
+      }
+    })
+
+    return valid
   }
 
   setToken(tokenOptions = {}) {
     this.token = new TokenOptions(tokenOptions)
+    this.includedContracts["token"] = true
   }
 
   setTokenSale(tokenSaleOptions = {}) {
     this.tokenSale = new TokenSaleOptions(tokenSaleOptions)
+    this.includeContracts["tokenSale"] = true
   }
 
   setWallet(walletOptions = {}) {
     this.wallet = new WalletOptions(walletOptions)
+    this.includedContracts["wallet"] = true
   }
 
   setPresale(presaleOptions = {}) {
     this.presale = new PresaleOptions(presaleOptions)
+    this.includedContracts["presale"] = true
   }
 
   setPresaleToken(presaleTokenOptions = {}) {
     this.presaleToken = new PresaleTokenOptions(presaleTokenOptions)
+    this.includedContracts["presaleToken"] = true
   }
 
-  isValid() {
-    if (!this.token.isComplete()) {
-      return false, "token configuration is not complete"
-    }
-    else if (!this.tokenSale.isComplete()) {
-      return false, "token sale configuration is not complete"
-    }
-    else if (!this.wallet.isComplete()) {
-      return false, "wallet configuration is not complete"
-    }
-    else {
-      return true
-    }
+  deleteToken() {
+    this.token = {}
+    this.includedContracts["token"] = false
+  }
+
+  deleteTokenSale() {
+    this.tokenSale = {}
+    this.includedContracts["tokenSale"] = false
+  }
+
+  deletePresaleToken() {
+    this.presaleToken = {}
+    this.includedContracts["presaleToken"] = false
+  }
+
+  deletePresale() {
+    this.presale = {}
+    this.includedContracts["presale"] = false
+  }
+
+  deleteWallet() {
+    this.wallet = {}
+    this.includedContracts["wallets"] = false
+  }
+
+  async saveConfiguration() {
+    let json = JSON.stringify(this)
+    await h.writeFile('./contracts/configuration.json', json)
+  }
+
+  async loadConfiguration() {
+    let json = await h.readFile('./contracts/configuration.json', json)
+    return JSON.parse(json)
   }
 
 }

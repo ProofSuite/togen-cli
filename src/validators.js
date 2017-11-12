@@ -74,6 +74,14 @@ const isString = function() {
   }
 }
 
+const isSet = function() {
+  return !(Object.keys(obj).length === 0 && obj.constructor === Object)
+}
+
+const isTrue = function(value) {
+  return (value)
+}
+
 
 module.exports = {
   isString,
@@ -83,7 +91,9 @@ module.exports = {
   isValidName,
   isValidTokenNumber,
   isValidCap,
-  isValidDecimals
+  isValidDecimals,
+  isSet,
+  isTrue
 }
 
 

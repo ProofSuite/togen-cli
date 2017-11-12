@@ -1,4 +1,5 @@
 'use strict'
+require('./src/utils.js')
 const questions = require('./src/questions')
 const command = require('inquirer')
 const clear = require('clear')
@@ -6,7 +7,7 @@ const Table = require('cli-table2')
 
 
 const { assemble } = require('./src/assembler/index.js')
-const { Configuration, TokenOptions, TokenSaleOptions, PresaleOptions, WalletOptions } = require ('./src/options')
+const { Configuration, TokenOptions, TokenSaleOptions, PresaleOptions, WalletOptions, IncludedContracts } = require ('./src/options')
 const { Compiler } = require('./src/compiler.js')
 const { getContractNames, getTable } = require('./src/helpers.js')
 
@@ -24,13 +25,12 @@ function main() {
 
 //TODO refactor and create a separate display module
 async function displayMenu() {
-  clear();
+  // clear();
   console.log('Welcome to the tokensale generator. Please select among the options below to choose your tokensale options')
   let options = await command.prompt(questions.categories)
 
   if (options.choice === 'Configure Contracts') {
     await displayContractSelectionMenu();
-    displayMenu();
   }
 	else if (options.choice === 'Display Contract Configuration') {
     displayCurrentConfiguration();
@@ -49,20 +49,22 @@ async function displayMenu() {
 	}
 	else if (options.choice === 'Help') {
 		displayHelp();
-	}
+  }
+
 }
+
 
 //TODO replace the hardcoded list of contracts by parsing the files in the templates folder
 async function displayContractSelectionMenu() {
   clear();
   console.log('Select the contracts you want to include in the configuration')
-  let contractFiles = ['Presale Tokensale', 'Presale Token', 'Token', 'Token Sale', 'Multisig Wallet']
+  let contractFiles = ['Presale', 'Presale Token', 'Token', 'Token Sale', 'Multisig Wallet']
   let contracts = questions.contractCheckboxList(contractFiles)
 
   let { choice } = await command.prompt(contracts)
-  choice.push('Go to main menu')
+  configuration.setIncludedContracts(choice)
 
-  await displayContractConfigurationMenu(choice)
+  await displayContractConfigurationMenu()
 }
 
 async function displayReturnToMainMenu() {
@@ -70,55 +72,70 @@ async function displayReturnToMainMenu() {
   displayMenu();
 }
 
-async function displayContractConfigurationMenu(contracts) {
+async function displayReturnToConfigurationMenu() {
+  let options = await command.prompt(questions.returnToMenu)
   clear();
-  let contractList = questions.contractOptionsList(contracts)
-  let options = await command.prompt(contractList)
+  displayContractConfigurationMenu();
+}
+
+
+
+async function displayContractConfigurationMenu() {
+
+  let optionsList = configuration.getIncludedContracts().uncamelize()
+  optionsList.push('Display Contract Configuration')
+  optionsList.push('Go to main menu')
+
+  let menu = questions.contractOptionsList(optionsList)
+  let options = await command.prompt(menu)
 
   if (options.choice === 'Token') {
 		await displayTokenMenu();
-		await displayContractConfigurationMenu(contracts);
 	}
 	else if (options.choice === 'Token Sale') {
     await displayTokenSaleMenu();
-		await displayContractConfigurationMenu(contracts);
   }
   else if (options.choice === 'Presale Token') {
     await displayPresaleTokenMenu();
-    await displayContractConfigurationMenu(contracts);
   }
-  else if (options.choice === 'Presale Tokensale') {
+  else if (options.choice === 'Presale') {
     await displayPresaleMenu();
-    await displayContractConfigurationMenu(contracts);
   }
 	else if (options.choice === 'Multisig Wallet') {
 		await displayWalletMenu();
-		await displayContractConfigurationMenu(contracts);
+  }
+  else if (options.choice === 'Display Contract Configuration') {
+    displayCurrentConfiguration();
+    await displayReturnToConfigurationMenu();
   }
   else if (options.choice === 'Go to main menu') {
     displayMenu();
   }
 }
 
+
 async function displayTokenMenu() {
   clear();
 	console.log('Answer the following questions to configure your token contract')
 	let options = await command.prompt(questions.token)
-	configuration.token = new TokenOptions(options)
+  configuration.token = new TokenOptions(options)
+  await displayContractConfigurationMenu()
 }
 
 async function displayTokenSaleMenu() {
   clear();
 	console.log('Answer the following questions to configure your tokensale contract')
 	let options = await command.prompt(questions.tokenSale)
-	configuration.tokenSale = new TokenSaleOptions(options)
+  configuration.tokenSale = new TokenSaleOptions(options)
+  await displayContractConfigurationMenu()
 }
 
 async function displayWalletMenu() {
   clear();
 	console.log('Answer the following questions to configure wallet options')
 	let options = await command.prompt(questions.wallet)
-	configuration.wallet = new WalletOptions(options)
+  configuration.wallet = new WalletOptions(options)
+  await displayContractConfigurationMenu()
 }
 
 async function displayPresaleMenu() {
@@ -126,6 +143,7 @@ async function displayPresaleMenu() {
   console.log('Answer the following questions to configure your presale contract')
   let options = await command.prompt(questions.presale)
   configuration.presale = new PresaleOptions(options)
+  await displayContractConfigurationMenu()
 }
 
 async function displayPresaleTokenMenu() {
@@ -133,6 +151,7 @@ async function displayPresaleTokenMenu() {
   console.log('Answer the following questions to configure your presale token contract')
   let options = await command.prompt(questions.token)
   configuration.presaleToken = new TokenOptions(options)
+  await displayContractConfigurationMenu()
 }
 
 
@@ -142,7 +161,7 @@ async function displayPresaleTokenMenu() {
 //TODO human-readable date along with timestamp for the startDate and the endDate
 function displayCurrentConfiguration() {
   clear();
-  let contracts = Object.keys(configuration)
+  let contracts = configuration.getIncludedContracts()
 
   contracts.forEach(function(contract) {
     let table = getTable(configuration[contract])

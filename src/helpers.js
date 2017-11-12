@@ -8,6 +8,7 @@ const Table = require('cli-table2')
 let readdir = util.promisify(fs.readdir)
 let appendFile = util.promisify(fs.appendFile)
 let readFile = util.promisify(fs.readFile)
+let writeFile = util.promisify(fs.writeFile)
 
 function toTimestamp(date){
   var timestamp = Date.parse(date);
@@ -63,10 +64,12 @@ function getTable(json) {
   return table.toString()
 }
 
+
 module.exports = {
   readdir,
   appendFile,
   readFile,
+  writeFile,
   toTimestamp,
   getContractName,
   getContracts,
