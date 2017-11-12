@@ -84,6 +84,8 @@ async function displayContractConfigurationMenu() {
 
   let optionsList = configuration.getIncludedContracts().uncamelize()
   optionsList.push('Display Contract Configuration')
+  optionsList.push('Save Configuration')
+  optionsList.push('Load Previous Configuration')
   optionsList.push('Go to main menu')
 
   let menu = questions.contractOptionsList(optionsList)
@@ -106,6 +108,14 @@ async function displayContractConfigurationMenu() {
   }
   else if (options.choice === 'Display Contract Configuration') {
     displayCurrentConfiguration();
+    await displayReturnToConfigurationMenu();
+  }
+  else if (options.choice === 'Save Configuration') {
+    configuration.saveConfiguration()
+    await displayReturnToConfigurationMenu();
+  }
+  else if (options.choice === 'Load Previous Configuration') {
+    configuration.loadConfiguration()
     await displayReturnToConfigurationMenu();
   }
   else if (options.choice === 'Go to main menu') {

@@ -198,14 +198,16 @@ class Configuration {
 
   async saveConfiguration() {
     let json = JSON.stringify(this)
-    await h.writeFile('./contracts/configuration.json', json)
+    await h.writeFile('./src/contracts/configuration.json', json)
   }
 
   async loadConfiguration() {
-    let json = await h.readFile('./contracts/configuration.json', json)
-    return JSON.parse(json)
+    let json = await h.readFile('./src/contracts/configuration.json')
+    let savedConfiguration = JSON.parse(json)
+    Object.keys(this).forEach((key) => {
+      this[key] = savedConfiguration[key]
+    })
   }
-
 }
 
 module.exports = {
