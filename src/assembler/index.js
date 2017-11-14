@@ -11,7 +11,7 @@ let { getContractBasename } = require('../helpers.js')
 
 //TODO promiseAll instead of sequential awaits
 //TODO delete files upon creation of new smart-contracts
-const assemble = async function(configuration) {
+const build = async function(configuration) {
   let generator = new Generator(configuration)
 
   let includedContracts = configuration.getIncludedContracts()
@@ -30,5 +30,5 @@ const assemble = async function(configuration) {
 }
 
 module.exports = {
-  assemble
+  build
 }

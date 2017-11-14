@@ -7,6 +7,7 @@ const path = require('path')
 const config = require('../config.js')
 const { concatenate } = require('./concatenator.js')
 
+
 //TODO need to clean the imports
 let { getContractName,
       getFlattenedContractPath,
@@ -86,15 +87,14 @@ class Compiler {
     let concatenatedFilePath = getFlattenedContractPath(contractName)
     let contract = this._getContractObject(concatenatedFilePath)
     await this.artifactor.save(contract)
-    console.log('File was created!')
   }
 
 
   //TODO replace forEach by a promiseAll so that the execution is async
   async compileAll(contractNames) {
-    contractNames.forEach((contractName) => {
-     this.compile(contractName)
-    })
+    let promises = contractNames.map(async(contract) => { await this.compile(contract)})
+    await Promise.all(promises)
+    // await display.waitUntilKeyPress();
   }
 
 

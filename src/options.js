@@ -1,6 +1,5 @@
 require('./utils.js')
 let h = require('./helpers.js')
-let { isSet } = require('./validators.js')
 let validator = require('./validators.js')
 
 
@@ -95,127 +94,9 @@ class WalletOptions {
 
 }
 
-
-//TODO split this file in two: options on one and configuration in the other file called configuration.js (+ change the corresponding imports)
-class Configuration {
-	constructor(contracts = [], tokenOptions = {}, tokenSaleOptions = {}, walletOptions = {}, presaleTokenOptions = {}, presaleOptions = {}) {
-		this.token = new TokenOptions(tokenOptions)
-    this.tokenSale = new TokenSaleOptions(tokenSaleOptions)
-    this.presaleToken = new TokenOptions(presaleTokenOptions)
-    this.presale = new PresaleOptions(presaleOptions)
-    this.wallet = new WalletOptions(walletOptions)
-
-    this.includedContracts = {
-      token: tokenOptions.isSet(),
-      tokenSale: tokenSaleOptions.isSet(),
-      presaleToken: presaleTokenOptions.isSet(),
-      presale: presaleOptions.isSet()
-    }
-  }
-
-  getContracts() {
-    return Object.keys(this.includedContracts)
-  }
-
-  getIncludedContracts() {
-    let isTrue = function(value) { return (value == true) }
-    let contracts = this.includedContracts.filterValues(isTrue)
-    return Object.keys(contracts)
-  }
-
-  setIncludedContracts(values) {
-    let contracts = this.getContracts()
-    let includedContracts = values.camelize()
-
-    contracts.forEach((contract) => {
-      if (includedContracts.indexOf(contract) != -1) {
-        this.includedContracts[contract] = true
-      } else {
-        this.includedContracts[contract] = false
-      }
-    })
-  }
-
-  isValid() {
-    let contracts = this.getIncludedContracts().camelize()
-    let valid = true;
-    contracts.forEach((contract) => {
-      if (!this[contract].isComplete()) {
-        valid = false;
-      }
-    })
-
-    return valid
-  }
-
-  setToken(tokenOptions = {}) {
-    this.token = new TokenOptions(tokenOptions)
-    this.includedContracts["token"] = true
-  }
-
-  setTokenSale(tokenSaleOptions = {}) {
-    this.tokenSale = new TokenSaleOptions(tokenSaleOptions)
-    this.includeContracts["tokenSale"] = true
-  }
-
-  setWallet(walletOptions = {}) {
-    this.wallet = new WalletOptions(walletOptions)
-    this.includedContracts["wallet"] = true
-  }
-
-  setPresale(presaleOptions = {}) {
-    this.presale = new PresaleOptions(presaleOptions)
-    this.includedContracts["presale"] = true
-  }
-
-  setPresaleToken(presaleTokenOptions = {}) {
-    this.presaleToken = new PresaleTokenOptions(presaleTokenOptions)
-    this.includedContracts["presaleToken"] = true
-  }
-
-  deleteToken() {
-    this.token = {}
-    this.includedContracts["token"] = false
-  }
-
-  deleteTokenSale() {
-    this.tokenSale = {}
-    this.includedContracts["tokenSale"] = false
-  }
-
-  deletePresaleToken() {
-    this.presaleToken = {}
-    this.includedContracts["presaleToken"] = false
-  }
-
-  deletePresale() {
-    this.presale = {}
-    this.includedContracts["presale"] = false
-  }
-
-  deleteWallet() {
-    this.wallet = {}
-    this.includedContracts["wallets"] = false
-  }
-
-  async saveConfiguration() {
-    let json = JSON.stringify(this)
-    await h.writeFile('./src/contracts/configuration.json', json)
-  }
-
-  async loadConfiguration() {
-    let json = await h.readFile('./src/contracts/configuration.json')
-    let savedConfiguration = JSON.parse(json)
-    Object.keys(this).forEach((key) => {
-      this[key] = savedConfiguration[key]
-    })
-  }
-}
-
 module.exports = {
 	TokenOptions,
   TokenSaleOptions,
   PresaleOptions,
-	WalletOptions,
-	Configuration
+	WalletOptions
  }
