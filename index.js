@@ -174,14 +174,16 @@ async function showCompilerMenu() {
     console.log("Contracts have been written to your root folder")
   }
   else if (choice === 'Print Bytecode') {
-    let choice = await showContractMenu()
+    let choice = await showContractMenu({additionalFields: []})
     let bytecode = await compiler.getByteCode(choice)
     console.log(bytecode)
+    await display.waitUntilKeyPress()
   }
   else if (choice === 'Print ABI') {
-    let choice = await showContractMenu()
+    let choice = await showContractMenu({additionalFields: []})
     let ABI = await compiler.getABI(choice)
     console.log(ABI)
+    await display.waitUntilKeyPress()
   }
 
   await showMainMenu();
