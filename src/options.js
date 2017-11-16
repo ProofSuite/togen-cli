@@ -2,14 +2,64 @@ require('./utils.js')
 let h = require('./helpers.js')
 let validator = require('./validators.js')
 
-
+//TODO rename as parameters
 class TokenOptions {
 
-	constructor({decimals, symbol, name}) {
+	constructor(parameters) {
 
-		this.decimals = decimals;
-		this.symbol = symbol;
-		this.name = name;
+    this.decimals = parameters.decimals;
+    this.symbol = parameters.symbol;
+    this.name = parameters.name;
+
+    if (parameters.contractName) {
+      this.contractName = parameters.contractName
+    } else if (parameters.name) {
+      this.contractName = this.name.camelize().capitalize()
+    }
+
+  }
+
+  //TODO refactor function when adding other type of token
+  setTokenType(type) {
+    if (!validator.isValidTokenType(type)) {
+      this.type = type
+    }
+  }
+
+  //TODO refactor to an array structure
+  //TODO include the parentContracts variable in the TokenOptions without displaying it in the configuration
+  resolveImports() {
+    let imports = {}
+
+    imports.safeMath = true
+
+    if (this.type == 'ERC20') {
+      imports.ERC20 = true
+      imports.Ownable = true
+    }
+    else if (this.type == 'MINIME') {
+      imports.approveCall = true
+      imports.controllable = true
+      imports.tokenInterface = true
+    }
+
+    return imports
+
+  }
+
+  //TODO refactor to an array structure
+  //TODO include the parentContracts variable in the TokenOptions
+  resolveParentContracts() {
+    let parentContracts = {}
+
+    if (this.type == 'ERC20') {
+      parentContracts.ERC20 = true
+      parentContracts.Ownable = true
+    } else if (this.type == 'MINIME') {
+      parentContracts.Controllable = true
+    }
+
+    return parentContracts
   }
 
   isComplete() {
@@ -19,6 +69,8 @@ class TokenOptions {
       } else if (!validator.isValidSymbol(this.symbol)) {
         return false
       } else if (!validator.isValidName(this.name)) {
+        return false
+      } else if (!validator.isTokenType(this.type)) {
         return false
       }
       return true
@@ -31,14 +83,25 @@ class TokenOptions {
 
 class TokenSaleOptions {
 
-	constructor({cap, tokenPrice, startDate, endDate, etherWallet}) {
-		this.cap = cap;
-		this.tokenPrice = tokenPrice;
-		this.startDate = h.toTimestamp(startDate);
-		this.endDate = h.toTimestamp(endDate);
-		this.etherWallet = etherWallet;
+	constructor(parameters, isPresale = 'false') {
+
+    this.capped = parameters.capped;
+		this.cap = parameters.cap;
+		this.tokenPrice = parameters.tokenPrice;
+		this.startTime = h.toTimestamp(parameters.startTime);
+		this.endTime = h.toTimestamp(parameters.endTime);
+    this.wallet = parameters.wallet;
+    this.isPresale = parameters.isPresale
+
+
+    this.proxyBalanceOf = parameters.proxyBalanceOf;
+    this.proxyTotalSupply = parameters.proxyTotalSupply;
+    this.contributors = parameters.contributors
+    this.minimumInvestment = parameters.minimumInvestment;
+    this.updateableController = parameters.updateableController
   }
 
+  //TODO complete this validation
   isComplete() {
     try {
       if (!validator.isPositiveNumber(this.cap)) {
@@ -52,40 +115,26 @@ class TokenSaleOptions {
     }
   }
 
-}
-
-class PresaleOptions {
-
-  constructor({wallet, rate, minInvestment, cap}) {
-    this.wallet = wallet;
-    this.rate = rate;
-    this.minInvestment = minInvestment;
-    this.cap = cap;
+  //TODO refactor to an array structure
+  //TODO include the parentContracts variable in the TokenOptions without displaying it in the configuration
+  //TODO personalize depending on the options
+  resolveImports() {
+    return {SafeMath: true, Pausable: true, TokenInterface: true}
   }
 
-  isComplete() {
-    try {
-      if (!validator.isValidAddress(this.address)) {
-        return false
-      } else if (!validator.isPositiveNumber(this.rate)) {
-        return false
-      } else if (!validator.isPositiveNumber(this.minInvestment)) {
-        return false
-      } else if (!validator.isPositiveNumber(this.cap)) {
-        return false
-      }
-
-      return true
-    } catch (error) {
-      return false
-    }
+  //TODO refactor to an array structure
+  //TODO include the parentContracts variable in the TokenOptions
+  //TODO personalize depending on the options
+  resolveParentContracts() {
+    return { Pausable: true }
   }
 }
+
 
 class WalletOptions {
 
 	constructor(options) {
-    this.multisig = options.multisig;
+    this.isMultiSig = options.isMultiSig;
   }
 
   isComplete() {
@@ -97,6 +146,5 @@ class WalletOptions {
 module.exports = {
 	TokenOptions,
   TokenSaleOptions,
-  PresaleOptions,
 	WalletOptions
  }

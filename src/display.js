@@ -5,29 +5,26 @@ const questions = require('./questions')
 const config = require('../config.js')
 const clikey = require('clikey')
 
+const Logger = require('./logger')
+const Configuration = require('./configuration')
 
-const { assembler } = require('./assembler/index.js')
-const { TokenOptions, TokenSaleOptions, PresaleOptions, PresaleTokenOptions } = require ('./options')
-const { Configuration } = require('./configuration')
-const { Compiler } = require('./compiler.js')
 const { getContractNames, getTable } = require('./helpers.js')
 
 command.registerPrompt('datetime', require('inquirer-datepicker-prompt'))
 
-let configuration = new Configuration()
-let compiler = new Compiler(config.artifactsFolder)
-
 
 //TODO put colors with chalk.js
+//TODO refactor message class correctly
 class Display {
 
   constructor(configuration) {
     this.configuration = configuration //not sure if this is necessary
+    this.message = new Logger()
   }
 
   //TODO human-readable date along with timestamp for the startDate and the endDate
   currentConfiguration(configuration) {
-    this.clear();
+    clear();
     let contracts = configuration.getIncludedContracts()
 
     contracts.forEach(function(contract) {
@@ -82,45 +79,8 @@ class Display {
     await clikey('Press any key to continue ...')
   }
 
-  mainMenuMessage() {
-    this.clear();
-    console.log('Welcome to the tokensale generator. Please select among the options below to choose your tokensale options\n')
-  }
-
-  configurationMenuMessage() {
-    this.clear();
-    console.log('You can create a new configuration or load a previously saved configuration. This configuration will define the parameters used to generate the token sale smart contract infrastructure\n')
-  }
-
-  contractSelectionMenuMessage() {
-    this.clear();
-    console.log('Select the contracts you want to include in the configuration\n')
-  }
-
-  contractConfigurationMenuMessage() {
-    this.clear();
-    console.log('')
-  }
-
-  paramsRequestMessage(contractName) {
-    this.clear();
-    console.log(`Input the requested parameters to configure your ${contractName} contract\n`)
-  }
-
-  configurationLoaded() {
-    console.log('Previous token sale configuration has been loaded correctly')
-  }
-
-  configurationSaved() {
-    console.log('Token Sale configuration has been saved correctly')
-  }
-
-  clear() {
-    clear();
-  }
-
 }
 
 
-module.exports = { Display }
+module.exports = Display
 

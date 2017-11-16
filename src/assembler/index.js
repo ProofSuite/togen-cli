@@ -15,7 +15,7 @@ const build = async function(configuration) {
   let generator = new Generator(configuration)
 
   let includedContracts = configuration.getIncludedContracts()
-
+  console.log(includedContracts)
   includedContracts.forEach(async function(contract) {
     let baseName = getContractBasename(contract)
     let filePath = path.join(config.outputFolder, baseName)

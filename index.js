@@ -1,4 +1,5 @@
 'use strict'
+
 require('./src/utils.js')
 const questions = require('./src/questions')
 const command = require('inquirer')
@@ -9,9 +10,10 @@ const assembler = require('./src/assembler/index.js')
 
 command.registerPrompt('datetime', require('inquirer-datepicker-prompt'))
 
-const { Configuration } = require('./src/configuration.js')
-const { Compiler } = require('./src/compiler.js')
-const { Display } = require('./src/display.js')
+const Configuration = require('./src/configuration.js')
+const Compiler = require('./src/compiler.js')
+const Display = require('./src/display.js')
+
 let configuration = new Configuration()
 let compiler = new Compiler(config.artifactsFolder)
 let display = new Display(configuration)
@@ -25,7 +27,7 @@ async function main() {
 //TODO refactor and create a separate display module
 async function showMainMenu() {
 
-  display.mainMenuMessage();
+  display.message.mainMenu();
   let { choice } = await command.prompt(questions.categories)
 
   if (choice === 'Configure Contracts') {
@@ -54,7 +56,7 @@ async function showMainMenu() {
 
 
 async function showConfigurationMenu() {
-  display.configurationMenuMessage();
+  display.message.configurationMenu();
   let options = await command.prompt(questions.configurationMenu)
 
   if (options.choice === 'New Configuration') {
@@ -66,12 +68,12 @@ async function showConfigurationMenu() {
   }
   else if (options.choice === 'Save Configuration') {
     configuration.saveConfiguration()
-    display.configurationSaved();
+    display.message.configurationSaved();
     await display.waitUntilKeyPress();
   }
   else if (options.choice === 'Load Previous Configuration') {
     configuration.loadConfiguration()
-    display.configurationLoaded();
+    display.message.configurationLoaded();
     await display.waitUntilKeyPress();
   }
   else if (options.choice === 'Back') {
@@ -84,8 +86,7 @@ async function showConfigurationMenu() {
 
 //TODO replace the hardcoded list of contracts by parsing the files in the templates folder
 async function showContractSelectionMenu() {
-  display.contractSelectionMenuMessage();
-
+  display.message.contractSelectionMenu()
   let contractFiles = ['Presale', 'Presale Token', 'Token', 'Token Sale', 'Multisig Wallet']
   let contracts = questions.contractCheckboxList(contractFiles)
 
@@ -97,11 +98,11 @@ async function showContractSelectionMenu() {
 
 
 async function showContractConfigurationMenu() {
-  display.contractConfigurationMenuMessage();
+  display.message.contractConfigurationMenu();
   let choice = await showContractMenu({ additionalFields: ['Display Contract Configuration', 'Go to main menu']})
 
   if (choice === 'Token') {
-		await requestTokenParameters();
+    await requestTokenParameters();
 	}
 	else if (choice === 'Token Sale') {
     await requestTokenSaleParameters();
@@ -126,36 +127,45 @@ async function showContractConfigurationMenu() {
 }
 
 async function requestTokenParameters() {
-  display.paramsRequestMessage('Token');
-	await configuration.updateToken()
-  await showContractConfigurationMenu()
-}
-
-async function requestTokenSaleParameters() {
-  display.paramsRequestMessage('Token Sale');
-	await configuration.updateTokenSale()
-  await showContractConfigurationMenu()
-}
-
-async function requestPresaleParameters() {
-  display.paramsRequestMessage('Presale');
-  await configuration.updatePresale()
+  display.message.paramsRequest('Token');
+  await configuration.updateToken()
+  display.message.paramsRequest('Token Type')
+  await configuration.updateTokenType();
   await showContractConfigurationMenu()
 }
 
 async function requestPresaleTokenParameters() {
-  display.paramsRequestMessage('Presale Token');
+  display.message.paramsRequest('Presale Token');
   await configuration.updatePresaleToken()
+  display.message.paramsRequest('Presale Token Type');
+  await configuration.updatePresaleTokenType()
   await showContractConfigurationMenu()
 }
 
+async function requestTokenSaleParameters() {
+  display.message.paramsRequest('Token Sale');
+  await configuration.updateTokenSale();
+  display.message.paramsRequest('Token Sale Type');
+  await configuration.updateTokenSaleType();
+  display.message.paramsRequest('Additional Options');
+  await configuration.updateTokenSaleCustomOptions();
+  await showContractConfigurationMenu()
+}
+
+async function requestPresaleParameters() {
+  display.message.paramsRequest('Presale');
+  await configuration.updatePresale();
+  display.message.paramsRequest('Presale Type');
+  await configuration.updatePresaleType();
+  await showContractConfigurationMenu();
+}
+
 async function requestWalletParameters() {
-  display.paramsRequestMessage('Wallet')
+  display.message.paramsRequest('Wallet')
 	let options = await command.prompt(questions.wallet)
   configuration.wallet = new WalletOptions(options)
   await showContractConfigurationMenu()
 }
-
 
 
 async function showCompilerMenu() {
@@ -197,23 +207,6 @@ async function showContractMenu({additionalFields = []}) {
   let { choice } = await command.prompt(menu)
   return choice
 }
-
-// async function getContractABI(contract) {
-//   let contractFiles = await getContracts()
-//   let contracts = contractList(contractFiles)
-//   let selectedContract = await command.prompt(contracts)
-//   let abi = compiler.getABI(selectedContract)
-//   console.log(abi)
-// }
-
-// async function getContractBytecode() {
-//   let contractFiles = await getContracts()
-//   let contracts = contractList(contractFiles)
-//   let selectedContract = await command.prompt(contracts)
-//   let bytecode = await compiler.getByteCode(selectedContract)
-//   console.log(bytecode)
-// }
-
 
 
 

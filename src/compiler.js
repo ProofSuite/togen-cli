@@ -96,11 +96,6 @@ class Compiler {
     await Promise.all(promises)
     // await display.waitUntilKeyPress();
   }
-
-
-
 }
 
-module.exports = {
-  Compiler
-}
+module.exports = Compiler

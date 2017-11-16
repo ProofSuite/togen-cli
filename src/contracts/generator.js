@@ -1,36 +1,43 @@
-
 let {
   TokenSaleTemplate,
-  TokenTemplate,
-  PresaleTokenTemplate,
-  PresaleTemplate
+  TokenTemplate
 } = require('./templates/index.js')
 
-//TODO move the template classes to another file and import them in the generator.js file
 class Generator {
   constructor(configuration) {
+    if (configuration.presaleToken) this.generatePresaleToken(configuration.presaleToken)
     if (configuration.token) this.generateToken(configuration.token)
     if (configuration.tokenSale) this.generateTokenSale(configuration.tokenSale)
     if (configuration.presale) this.generatePresale(configuration.presale)
-    if (configuration.presaleToken) this.generatePresaleToken(configuration.presaleToken)
   }
 
-  generateTokenSale(options) {
-    this.tokenSale = new TokenSaleTemplate(options)
+
+  //TODO refactor imports and parentClasses, perhaps call them directly in the template file ?
+  generateTokenSale(parameters) {
+    parameters.imports = parameters.resolveImports();
+    parameters.parentContracts = parameters.resolveParentContracts();
+    this.tokenSale = new TokenSaleTemplate(parameters)
   }
 
-  generateToken(options) {
-    this.token = new TokenTemplate(options)
+  generateToken(parameters) {
+    parameters.imports = parameters.resolveImports();
+    parameters.parentContracts = parameters.resolveParentContracts();
+    this.token = new TokenTemplate(parameters)
   }
 
-  generatePresaleToken(options) {
-    this.presaleToken = new PresaleTokenTemplate(options)
+  generatePresaleToken(parameters) {
+    parameters.imports = parameters.resolveImports();
+    console.log(parameters.imports)
+    parameters.parentContracts = parameters.resolveParentContracts();
+    console.log(parameters.parentContracts)
+    this.presaleToken = new TokenTemplate(parameters)
   }
 
-  generatePresale(options) {
-    this.presale = new PresaleTemplate(options)
+  generatePresale(parameters) {
+    parameters.imports = parameters.resolveImports();
+    parameters.parentContracts = parameters.resolveParentContracts();
+    this.presale = new TokenSaleTemplate(parameters)
   }
-
 }
 
 module.exports = {

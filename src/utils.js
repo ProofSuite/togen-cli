@@ -44,3 +44,8 @@ Array.prototype.unique = function() {
 String.prototype.capitalize = function(separator = " ") {
   return this.charAt(0).toUpperCase(0) + this.slice(1);
 }
+
+Array.prototype.capitalize = function() {
+  let capitalized = this.map((element) => { return element.capitalize() })
+  return capitalized
+}

@@ -23,6 +23,11 @@ const isValidTokenNumber = function (value) {
   }
 }
 
+const isValidTokenType = function (value) {
+  let tokenTypes = ['ERC20', 'MINIME']
+  return (tokenTypes.indexOf(value) != -1)
+}
+
 const isValidCap = function (value) {
   value = parseInt(value)
   if (!Number.isInteger(value) || value <= 0) {
@@ -92,6 +97,7 @@ module.exports = {
   isValidTokenNumber,
   isValidCap,
   isValidDecimals,
+  isValidTokenType,
   isSet,
   isTrue
 }

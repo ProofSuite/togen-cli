@@ -28,7 +28,7 @@ contract TokenSale is Pausable {
   bool public started = false;
   bool public finalized = false;
 
-  address public constant etherWallet = 0x1942406a1b27e67e869665e5244ae3367ae3c7d2;
+  address public constant wallet = 0x1942406a1b27e67e869665e5244ae3367ae3c7d2;
   uint256 public constant priceInWei = 100;
   uint256 public tokenCap = 10000000;
 
@@ -86,7 +86,7 @@ contract TokenSale is Pausable {
   * Forwards funds to the tokensale wallet
   */
   function forwardFunds() internal {
-    etherWallet.transfer(msg.value);
+    wallet.transfer(msg.value);
   }
 
 

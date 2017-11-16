@@ -11,4 +11,16 @@ const config = {
   artifactsFolder: path.join(workingDirectory, './src/contracts/json')
 }
 
+const params = {
+  name: 'Proof Token',
+  symbol: 'PRFT',
+  decimals: 18,
+  contractName: 'Proof Token',
+  minime: true,
+  imports: {
+    Controllable: true,
+    ApproveCall: true
+  }
+}
+
 module.exports = config

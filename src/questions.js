@@ -50,14 +50,51 @@ const token = [
   }
 ];
 
+const tokenType = {
+  type: 'list',
+  name: 'choice',
+  message: 'Select Type of Token',
+  choices: ['MINIME', 'ERC20']
+}
+
+const tokenSaleAdditionalConfiguration = [
+  {
+    type : 'confirm',
+    name : 'advancedCustomization',
+    message : 'You can choose to configure advanced options or leave them to default',
+    choices : ['Default', 'Custom']
+  },
+  {
+    type : 'confirm',
+    name : 'contributors',
+    message : 'Show contributors ?',
+    when: function(answers) {
+      return (answers.advancedCustomization == 'Custom')
+    },
+    default: true
+  },
+  {
+    type : 'confirm',
+    name : 'updateableController',
+    message: 'Possibility to update the token sale controller',
+    when: function(answers) {
+      return (answers.advancedCustomization == 'Custom')
+    },
+    default: false
+  },
+  {
+    type: 'confirm',
+    name: 'proxy',
+    message: 'Display proxy balance and proxy total supply of corresponding token ?',
+    when: function(answers) {
+      return (answers.advancedCustomization == 'Custom')
+    },
+    default: true
+  },
+]
+
 
 const tokenSale = [
-  {
-    type : 'input',
-    name : 'cap',
-    message : 'Please input token hard cap',
-    validate: validator.isValidCap
-  },
   {
     type : 'input',
     name : 'tokenPrice',
@@ -66,24 +103,41 @@ const tokenSale = [
   },
   {
     type: 'datetime',
-    name : 'startDate',
+    name : 'startTime',
     message: 'Please input beginning date',
     format: ['m', '/', 'd', '/', 'yy', ' ', 'h', ':', 'MM', ' ', 'TT']
   },
   {
     type : 'datetime',
-    name : 'endDate',
+    name : 'endTime',
     message : 'Please input ending date',
     format: ['m', '/', 'd', '/', 'yy', ' ', 'h', ':', 'MM', ' ', 'TT']
   },
   {
     type : 'input',
-    name : 'etherWallet',
+    name : 'wallet',
     message : 'Please input ethereum wallet address (to which tokensale funds will be forwarded)',
     validate: validator.isValidAddress
   }
 ]
 
+const tokenSaleType = [
+  {
+    type: 'list',
+    name: 'type',
+    message: 'Select type of Tokensale',
+    choices: ['Capped', 'Uncapped']
+  },
+  {
+    type: 'input',
+    name: 'cap',
+    message: 'Input tokensale cap',
+    validate: validator.isValidCap,
+    when: function(answers) {
+      return (answers.type == 'Capped')
+    }
+  }
+]
 
 const presale = [
   {
@@ -94,7 +148,7 @@ const presale = [
   },
   {
     type: 'input',
-    name: 'minInvestment',
+    name: 'minimumInvestment',
     message: 'Please input minimum investment (in wei)',
     validate: validator.isPositiveNumber
   },
@@ -111,6 +165,7 @@ const presale = [
     validate: validator.isValidAddress
   }
 ]
+
 
 const wallet = [
   {
@@ -169,5 +224,7 @@ module.exports = {
   contractList,
   contractCheckboxList,
   contractOptionsList,
-  returnToMenu
+  tokenType,
+  tokenSaleType,
+  tokenSaleAdditionalConfiguration
 }
