@@ -1,4 +1,7 @@
 module.exports = () =>
-`function forwardFunds() internal {
+`
+function forwardFunds() internal
+{
   wallet.transfer(msg.value);
-}`
+}
+`

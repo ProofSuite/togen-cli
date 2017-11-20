@@ -7,39 +7,45 @@ class Logger {
   }
 
   mainMenu() {
-    clear();
+    // clear();
     console.log('Welcome to the tokensale generator. Please select among the options below to choose your tokensale options\n')
   }
 
   configurationMenu() {
-    clear();
+    // clear();
     console.log('You can create a new configuration or load a previously saved configuration. This configuration will define the parameters used to generate the token sale smart contract infrastructure\n')
   }
 
   contractSelectionMenu() {
-    clear();
+    // clear();
     console.log('Select the contracts you want to include in the configuration\n')
   }
 
   contractConfigurationMenu() {
-    clear();
+    // clear();
     console.log('')
   }
 
   paramsRequest(contractName) {
-    clear();
+    // clear();
     console.log(`Input the requested parameters to configure your ${contractName} contract\n`)
   }
 
   configurationLoaded() {
-    clear();
+    // clear();
     console.log(`Configuration has been loaded properly`)
   }
 
   configurationSaved() {
-    clear();
+    // clear();
     console.log(`Configuration has been saved`)
   }
+
+  updateCapOptions() {
+
+  }
+
+
 
 }
 

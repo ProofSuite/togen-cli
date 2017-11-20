@@ -24,6 +24,9 @@ module.exports = {
     forwardFunds: require('./tokenSale/forwardFunds.js'),
     tokenBalanceProxy: require('./tokenSale/tokenBalanceProxy.js'),
     tokenSupplyProxy: require('./tokenSale/tokenSupplyProxy.js'),
-    validPurchase: require('./tokenSale/validPurchase.js')
+    validPurchase: require('./tokenSale/validPurchase.js'),
+    forceStart: require('./tokenSale/forceStart.js'),
+    lockTransfers: require('./tokenSale/lockTransfers.js'),
+    getPrice: require('./tokenSale/getPrice.js')
   }
 }

@@ -14,18 +14,18 @@ ${imports(params.imports)}
 /**
  * @title ${params.contractName}
  */
-contract ${params.contractName} is ${parentContracts(params.parentContracts)} {
+contract Token is ${parentContracts(params.parentContracts)} {
 
-  ${ (params.type == 'MINIME') ? statements.token.minime.variables(params) : statements.token.erc20.variables(params)}
+  ${ (params.tokenStandard == 'MINIME') ? statements.token.minime.variables(params) : statements.token.erc20.variables(params)}
   ${ statements.token.events() }
   ${ functions.token.constructor() }
   ${ functions.token.fallback() }
 
-  ${ (params.type == 'MINIME') ? functions.token.minime.totalSupply() : `` }
-  ${ (params.type == 'MINIME') ? functions.token.minime.balanceOf() : functions.token.erc20.balanceOf()}
-  ${ (params.type == 'MINIME') ? functions.token.minime.transfers() : functions.token.erc20.transfers()}
-  ${ (params.type == 'MINIME') ? functions.token.minime.minting() : functions.token.erc20.minting()}
-  ${ (params.type == 'MINIME') ? functions.token.minime.baseFunctions() : `` }
+  ${ (params.tokenStandard == 'MINIME') ? functions.token.minime.totalSupply() : `` }
+  ${ (params.tokenStandard == 'MINIME') ? functions.token.minime.balanceOf() : functions.token.erc20.balanceOf()}
+  ${ (params.tokenStandard == 'MINIME') ? functions.token.minime.transfers() : functions.token.erc20.transfers()}
+  ${ (params.tokenStandard == 'MINIME') ? functions.token.minime.minting() : functions.token.erc20.minting()}
+  ${ (params.tokenStandard == 'MINIME') ? functions.token.minime.baseFunctions() : `` }
 
 }
 `

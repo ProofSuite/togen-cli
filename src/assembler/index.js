@@ -3,9 +3,10 @@ const path = require('path')
 const util = require('util')
 const writeFile = util.promisify(fs.writeFile)
 const deleteFile = util.promisify(fs.unlink)
+const format = require('js-beautify').js_beautify
 const config = require('../../config.js')
 const { MultiSigWalletTemplate } = require('../contracts/templates/index.js')
-const { Generator } = require('../contracts/generator.js')
+const Generator = require('../contracts/generator.js')
 
 let { getContractBasename } = require('../helpers.js')
 
@@ -15,10 +16,10 @@ const build = async function(configuration) {
   let generator = new Generator(configuration)
 
   let includedContracts = configuration.getIncludedContracts()
-  console.log(includedContracts)
   includedContracts.forEach(async function(contract) {
     let baseName = getContractBasename(contract)
     let filePath = path.join(config.outputFolder, baseName)
+    // let fileContent = format(generator[contract].text)
     await writeFile(filePath, generator[contract].text)
   })
 

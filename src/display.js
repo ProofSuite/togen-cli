@@ -6,7 +6,7 @@ const config = require('../config.js')
 const clikey = require('clikey')
 
 const Logger = require('./logger')
-const Configuration = require('./configuration')
+const Configuration = require('./configuration/configuration.js')
 
 const { getContractNames, getTable } = require('./helpers.js')
 

@@ -1,25 +1,5 @@
 
 
-/**
- * @title ERC20 interface
- * @dev see https://github.com/ethereum/EIPs/issues/20
- */
-contract ERC20 {
-
-  uint256 public totalSupply;
-
-  function balanceOf(address _owner) constant returns (uint256);
-  function transfer(address _to, uint256 _value) returns (bool);
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool);
-  function approve(address _spender, uint256 _value) returns (bool);
-  function allowance(address _owner, address _spender) constant returns (uint256);
-
-  event Transfer(address indexed _from, address indexed _to, uint256 _value);
-  event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-
-}
-
-
 
 /**
  * @title Ownable
@@ -56,134 +36,6 @@ contract Ownable {
   }
 
 }
-
-
-/**
- * @title SafeMath
- * @dev Math operations with safety checks that throw on error
- */
-library SafeMath {
-  function mul(uint256 a, uint256 b) internal constant returns (uint256) {
-    uint256 c = a * b;
-    assert(a == 0 || c / a == b);
-    return c;
-  }
-
-  function div(uint256 a, uint256 b) internal constant returns (uint256) {
-    // assert(b > 0); // Solidity automatically throws when dividing by 0
-    uint256 c = a / b;
-    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-    return c;
-  }
-
-  function sub(uint256 a, uint256 b) internal constant returns (uint256) {
-    assert(b <= a);
-    return a - b;
-  }
-
-  function add(uint256 a, uint256 b) internal constant returns (uint256) {
-    uint256 c = a + b;
-    assert(c >= a);
-    return c;
-  }
-}
-
-
-
-
-
-
-/**
- * @title PresaleToken
- * Standard Mintable ERC20 Token
- */
-
-contract PresaleToken is ERC20, Ownable {
-
-  using SafeMath for uint256;
-
-  mapping(address => uint) balances;
-  mapping (address => mapping (address => uint)) allowed;
-
-  string public constant name = 'David';
-  string public constant symbol = 'DVE';
-  uint8 public constant decimals = 18;
-  bool public mintingFinished = false;
-
-  event Mint(address indexed to, uint256 amount);
-  event MintFinished();
-
-  function PresaleToken() {}
-
-  function() payable {
-    revert();
-  }
-
-  function balanceOf(address _owner) constant returns (uint256) {
-    return balances[_owner];
-  }
-
-  function transfer(address _to, uint _value) returns (bool) {
-
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-
-    Transfer(msg.sender, _to, _value);
-    return true;
-  }
-
-  function transferFrom(address _from, address _to, uint _value) returns (bool) {
-    var _allowance = allowed[_from][msg.sender];
-
-    balances[_to] = balances[_to].add(_value);
-    balances[_from] = balances[_from].sub(_value);
-    allowed[_from][msg.sender] = _allowance.sub(_value);
-
-    Transfer(_from, _to, _value);
-    return true;
-  }
-
-  function approve(address _spender, uint _value) returns (bool) {
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
-    return true;
-  }
-
-  function allowance(address _owner, address _spender) constant returns (uint256) {
-    return allowed[_owner][_spender];
-  }
-
-
-  modifier canMint() {
-    require(!mintingFinished);
-    _;
-  }
-
-  /**
-   * Function to mint tokens
-   * @param _to The address that will recieve the minted tokens.
-   * @param _amount The amount of tokens to mint.
-   * @return A boolean that indicates if the operation was successful.
-   */
-  function mint(address _to, uint256 _amount) onlyOwner canMint returns (bool) {
-    totalSupply = totalSupply.add(_amount);
-    balances[_to] = balances[_to].add(_amount);
-    Mint(_to, _amount);
-    return true;
-  }
-
-  /**
-   * Function to stop minting new tokens.
-   * @return True if the operation was successful.
-   */
-  function finishMinting() onlyOwner returns (bool) {
-    mintingFinished = true;
-    MintFinished();
-    return true;
-  }
-
-}
-
 
 
 
@@ -237,6 +89,112 @@ contract Pausable is Ownable {
 
 
 
+/**
+ * @title SafeMath
+ * @dev Math operations with safety checks that throw on error
+ */
+library SafeMath {
+  function mul(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
+
+  function div(uint256 a, uint256 b) internal constant returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return c;
+  }
+
+  function sub(uint256 a, uint256 b) internal constant returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+
+  function add(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }
+}
+
+
+
+/**
+ * @title Controllable
+ * @dev The Controllable contract has an controller address, and provides basic authorization control
+ * functions, this simplifies the implementation of "user permissions".
+ */
+contract Controllable {
+  address public controller;
+
+
+  /**
+   * @dev The Ownable constructor sets the original `owner` of the contract to the sender account.
+   */
+  function Controllable() public {
+    controller = msg.sender;
+  }
+
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyController() {
+    require(msg.sender == controller);
+    _;
+  }
+
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newController The address to transfer ownership to.
+   */
+  function transferControl(address newController) public onlyController {
+    if (newController != address(0)) {
+      controller = newController;
+    }
+  }
+
+}
+
+
+
+
+/**
+ * @title TokenInterface
+ * Standard Mintable ERC20 Token
+ */
+contract TokenInterface is Controllable {
+
+  event Mint(address indexed to, uint256 amount);
+  event MintFinished();
+  event ClaimedTokens(address indexed _token, address indexed _owner, uint _amount);
+  event NewCloneToken(address indexed _cloneToken, uint _snapshotBlock);
+  event Approval(address indexed _owner, address indexed _spender, uint256 _amount);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+
+  function totalSupply() public constant returns (uint);
+  function totalSupplyAt(uint _blockNumber) public constant returns(uint);
+  function balanceOf(address _owner) public constant returns (uint256 balance);
+  function balanceOfAt(address _owner, uint _blockNumber) public constant returns (uint);
+  function transfer(address _to, uint256 _amount) public returns (bool success);
+  function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success);
+  function approve(address _spender, uint256 _amount) public returns (bool success);
+  function approveAndCall(address _spender, uint256 _amount, bytes _extraData) public returns (bool success);
+  function allowance(address _owner, address _spender) public constant returns (uint256 remaining);
+  function mint(address _owner, uint _amount) public returns (bool);
+
+  function lockPresaleBalances() public returns (bool);
+  function finishMinting() public returns (bool);
+  function enableTransfers(bool _value) public;
+  function enableMasterTransfers(bool _value) public;
+  function createCloneToken(uint _snapshotBlock, string _cloneTokenName, string _cloneTokenSymbol) public returns (address);
+
+}
+
+
+
+
 
 
 
@@ -244,108 +202,152 @@ contract Pausable is Ownable {
 /**
  * @title Presale
  */
-
 contract Presale is Pausable {
-  using SafeMath for uint256;
+
+  
+  
+using SafeMath for uint256;
+
+  
+  TokenInterface public token;
+
+  
+  
+bool public finalized = false;
+
+  
+  uint256 public startTime = 1511177379;
+  uint256 public endTime = 1513769380;
+
+  
+  uint256 public tokenCap = 10000 * (10 ** 18);
+  uint256 public cap = tokenCap / (10 ** 18);
+  uint256 public weiCap = cap * price;
 
 
-  PresaleToken public token;
-  address public wallet;
-  uint256 public weiRaised;
-  uint256 public cap;
-  uint256 public minInvestment;
-  uint256 public rate;
-  bool public isFinalized;
-  string public contactInformation;
+  
+  
+  uint256 public minInvestment = 100;
+
+  
+  uint256 public decimalsMultiplier = (10 ** 18);
+  uint256 public totalWeiRaised;
+  uint256 public tokensMinted;
+  uint256 public totalSupply;
+
+  address public wallet = 0x5b6061446f8bd652e6dc09366c57f1fa802012c3;
+  uint256 public price = 1000;
 
 
-  /**
-   * event for token purchase logging
-   * @param purchaser who paid for the tokens
-   * @param beneficiary who got the tokens
-   * @param value weis paid for purchase
-   * @param amount amount of tokens purchased
-   */
+  
   event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
-  /**
-   * event for signaling finished crowdsale
-   */
   event Finalized();
 
+  
+function TokenSale(address _tokenAddress) public {
+  require(_tokenAddress != 0x0);
+  token = TokenInterface(_tokenAddress);
+}
 
-
-  /**
-   * crowdsale constructor
-   */
-  function Presale() {
-
-    token = createTokenContract();
-    wallet = 0xa6bfd6487baf0cdc6eeb1da277f3c74eb9eec3b8;
-    rate = 10;
-    minInvestment = 10; //minimum investment in wei
-    cap = 100000 * (10 ** 18);
-  }
-
-  // creates presale token
-  function createTokenContract() internal returns (PresaleToken) {
-    return new PresaleToken();
-
-  }
-
+  
   // fallback function to buy tokens
-  function() payable {
+  function() public payable
+  {
     buyTokens(msg.sender);
   }
 
-
+  
+  
   /**
    * Low level token purchse function
    * @param beneficiary will recieve the tokens.
    */
-  function buyTokens(address beneficiary) payable whenNotPaused {
+  function buyTokens(address beneficiary)
+    public
+    payable
+    whenNotPaused
+    whenNotFinalized
+  {
     require(beneficiary != 0x0);
     require(validPurchase());
 
-
     uint256 weiAmount = msg.value;
-    weiRaised = weiRaised.add(weiAmount);
-    uint256 tokens = weiAmount.mul(rate);
+    totalWeiRaised = totalWeiRaised.add(weiAmount);
+
+    
+    uint256 tokens = weiAmount.mul(decimalsMultiplier).div(price);
+    
+
+    tokensMinted = tokensMinted.add(tokens);
+    require(tokensMinted < tokenCap);
+    
 
     token.mint(beneficiary, tokens);
     TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
     forwardFunds();
   }
 
-  function forwardFunds() internal {
-    wallet.transfer(msg.value);
-  }
+  
+function forwardFunds() internal
+{
+  wallet.transfer(msg.value);
+}
 
+  
+  /**
+   * Validates the purchase (period, minimum amount, within cap)
+   * @return {bool} valid
+   */
   function validPurchase() internal constant returns (bool) {
-
-    uint256 weiAmount = weiRaised.add(msg.value);
-    bool notSmallAmount = msg.value >= minInvestment;
-    bool withinCap = weiAmount.mul(rate) <= cap;
-
-    return (notSmallAmount && withinCap);
+    
+    
+    
+    uint256 current = now;
+    require(current >= startTime);
+    require(current <= endTime);
+    
+    return true;
   }
+  
+  
+  
+  
+/**
+ * Change the Token controller
+ * @param _newController {address} New Token controller
+ */
+ function changeController(address _newController) onlyOwner public returns (bool) {
+   token.transferControl(_newController);
+   return true;
+ }
+ 
+  
+function enableTransfers() public returns (bool) {
+  token.enableTransfers(true);
+  return true;
+}
 
-  function finalize() onlyOwner {
-    require(!isFinalized);
-    require(hasEnded());
+function lockTransfers() public onlyOwner returns (bool) {
+  token.enableTransfers(false);
+  return true;
+}
 
-    token.finishMinting();
-    Finalized();
+  
+  
+function finalize() public onlyOwner returns (bool) {
+  require(paused);
 
-    isFinalized = true;
-  }
+  token.finishMinting();
+  Finalized();
+
+  finalized = true;
+  return true;
+}
+
+modifier whenNotFinalized() {
+  require(!finalized);
+  _;
+}
 
 
-  function setContactInformation(string info) onlyOwner {
-      contactInformation = info;
-  }
-
-  function hasEnded() public constant returns (bool) {
-    bool capReached = (weiRaised.mul(rate) >= cap);
-    return capReached;
-  }
 }

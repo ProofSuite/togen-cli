@@ -27,7 +27,13 @@ class Compiler {
   }
 
   _clean(compiled, contractName) {
-    return Schema.normalize(compiled.contracts[contractName] || compiled.contracts[":" + contractName])
+    console.log(contractName)
+    console.log(compiled)
+    console.log(compiled.contracts[contractName])
+    console.log(compiled.contracts[":" + contractName])
+    let schema = Schema.normalize(compiled.contracts[contractName] || compiled.contracts[":" + contractName])
+    console.log(schema)
+    return schema
   }
 
   _compileAndClean(filePath) {

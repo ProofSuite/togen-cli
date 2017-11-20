@@ -1,6 +1,6 @@
 module.exports = () =>
 `
-function balanceOf(address _owner) constant returns (uint256) {
+function balanceOf(address _owner) public constant returns (uint256) {
   return balances[_owner];
 }
 `

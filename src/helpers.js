@@ -53,8 +53,6 @@ function getArtifactPath(contractName) {
   return filePath
 }
 
-
-
 function filterSolidityFiles(files) {
   return files.filter((file) => { return path.extname(file) === '.sol' })
 }

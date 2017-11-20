@@ -27,9 +27,7 @@ class Generator {
 
   generatePresaleToken(parameters) {
     parameters.imports = parameters.resolveImports();
-    console.log(parameters.imports)
     parameters.parentContracts = parameters.resolveParentContracts();
-    console.log(parameters.parentContracts)
     this.presaleToken = new TokenTemplate(parameters)
   }
 
@@ -40,6 +38,4 @@ class Generator {
   }
 }
 
-module.exports = {
-  Generator
-}
+module.exports = Generator

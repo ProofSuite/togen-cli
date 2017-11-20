@@ -1,9 +1,10 @@
 module.exports = (params = {}) => {
   let minimumInvestmentCondition = ``;
   let timeCondition = ``;
+  let forceStartCondition = ``;
 
-  if (params.minInvestment && params.minInvestment > 0) {
-    let minimumInvestmentCondition = `require(msg.value >= ${params.minInvestment});`
+  if (params.minimumInvestment && params.minimumInvestment > 0) {
+    let minimumInvestmentCondition = `require(msg.value >= ${params.minimumInvestment});`
   } else {
     let minimumInvestmentCondition = `require(msg.value != 0);`
   }
@@ -11,16 +12,30 @@ module.exports = (params = {}) => {
 
   //TODO include conditions within the statement folder ?
   //TODO have to check for started condition
-  if (params.startDate && params.endDate) {
-    timeCondition = `
+  if (params.startTime && params.endTime) {
+    timeCondition =
+    `
     uint256 current = now;
-    require(current >= ${params.startDate} || started);
-    require(current <= ${params.endDate});
+    require(current >= startTime);
+    require(current <= endTime);
     `
   }
 
-  let body = `
+  if (params.forceStarteable) {
+    forceStartCondition =
+    `
+    require(started);
+    `
+  }
+
+  let body =
+  `
+  /**
+   * Validates the purchase (period, minimum amount, within cap)
+   * @return {bool} valid
+   */
   function validPurchase() internal constant returns (bool) {
+    ${forceStartCondition}
     ${minimumInvestmentCondition}
     ${timeCondition}
     return true;

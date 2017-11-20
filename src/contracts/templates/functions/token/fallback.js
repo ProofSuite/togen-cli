@@ -1,6 +1,7 @@
 module.exports = () =>
 `
-function() public payable {
-  revert();
-}
+  function() public payable
+  {
+    revert();
+  }
 `

@@ -1,6 +1,6 @@
 module.exports = () =>
 `
-function transfer(address _to, uint _value) returns (bool) {
+function transfer(address _to, uint _value) public returns (bool) {
   balances[msg.sender] = balances[msg.sender].sub(_value);
   balances[_to] = balances[_to].add(_value);
 
@@ -8,7 +8,7 @@ function transfer(address _to, uint _value) returns (bool) {
   return true;
 }
 
-function transferFrom(address _from, address _to, uint _value) returns (bool) {
+function transferFrom(address _from, address _to, uint _value) public returns (bool) {
   var _allowance = allowed[_from][msg.sender];
 
   balances[_to] = balances[_to].add(_value);
@@ -19,13 +19,13 @@ function transferFrom(address _from, address _to, uint _value) returns (bool) {
   return true;
 }
 
-function approve(address _spender, uint _value) returns (bool) {
+function approve(address _spender, uint _value) public returns (bool) {
   allowed[msg.sender][_spender] = _value;
   Approval(msg.sender, _spender, _value);
   return true;
 }
 
-function allowance(address _owner, address _spender) constant returns (uint256) {
+function allowance(address _owner, address _spender) public constant returns (uint256) {
   return allowed[_owner][_spender];
 }
 `

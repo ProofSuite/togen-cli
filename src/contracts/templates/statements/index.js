@@ -11,6 +11,7 @@ module.exports = {
   tokenSale: {
     variables: require('./tokenSale/variables.js'),
     events: require('./tokenSale/events.js'),
+    computeTokens: require('./tokenSale/computeTokens.js'),
     addContributor: () => `contributors = contributors.add(1);`,
     requireWithinCap: () => `require(tokensMinted < tokenCap);`
   }

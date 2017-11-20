@@ -1,4 +1,5 @@
 const validator = require('./validators.js')
+const { toTimestamp } = require('./helpers.js')
 
 const categories = {
   type: 'list',
@@ -11,7 +12,7 @@ const configurationMenu = {
   type: 'list',
   name: 'choice',
   message: 'Select Action',
-  choices: ['New Configuration', 'Display Current Configuration', 'Load Previous Configuration', 'Save Configuration', 'Back']
+  choices: ['Edit Configuration', 'Display Current Configuration', 'Load Previous Configuration', 'Save Configuration', 'Back']
 }
 
 const compilerMenu = {
@@ -19,13 +20,6 @@ const compilerMenu = {
   name: 'choice',
   message: 'Select Action',
   choices: ['Compile All Contracts', 'Compile Contract', 'Print Bytecode', 'Print ABI', 'Copy Bytecode to clipboard', 'Copy API to clipboard']
-}
-
-const returnToMenu = {
-  type: 'list',
-  name: 'choice',
-  message: ' ',
-  choices: ['Go back']
 }
 
 //TODO replace validator.isPositiveNumber by validator.isDecimals (which is somehow not working)
@@ -57,40 +51,105 @@ const tokenType = {
   choices: ['MINIME', 'ERC20']
 }
 
-const tokenSaleAdditionalConfiguration = [
+const tokenMenu = {
+  type: 'list',
+  name: 'choice',
+  message: 'Configure Token',
+  choices: ['Base Configuration', 'Token Type', 'Advanced Configuration', 'Display Current Configuration', 'Back']
+}
+
+const tokenAdvancedConfiguration = [
   {
-    type : 'confirm',
-    name : 'advancedCustomization',
+    type: 'list',
+    name: 'advancedSettings',
+    message: 'You can choose to configure advanced options or leave them to default',
+    choices: ['Default', 'Custom']
+  },
+  {
+    type: 'confirm',
+    name: 'allowTransfers',
+    message: 'This settings defines whether tokens can be transfered or not',
+    when: function(answers) {
+      return (answers.advancedSettings == 'Custom')
+    }
+  },
+  {
+    type: 'confirm',
+    name: 'lockableTransfers',
+    message: 'This settings defines whether token transfers can be locked or not',
+    when: function(answers) {
+      return (answers.advancedSettings == 'Custom' && answers.allowTransfers == true)
+    }
+  }
+]
+
+const tokenSaleMenu = {
+  type: 'list',
+  name: 'choice',
+  message: 'Configure Tokensale',
+  choices: ['Base Configuration', 'Cap Configuration', 'Timing Configuration', 'Advanced Configuration', 'Display Current Configuration', 'Back']
+}
+
+const tokenSaleAdvancedConfiguration = [
+  {
+    type : 'list',
+    name : 'settings',
     message : 'You can choose to configure advanced options or leave them to default',
     choices : ['Default', 'Custom']
+  },
+  {
+    type: 'confirm',
+    name: 'finalizeable',
+    message: 'Possibility to manually end the token sale',
+    when: function(answers) {
+      return (answers.settings == 'Custom')
+    },
+    default: true
+  },
+  {
+    type: 'confirm',
+    name: 'starteable',
+    message: 'Possibility to manually start the token sale',
+    when: function(answers) {
+      return (answers.settings == 'Custom')
+    },
+    default: true
   },
   {
     type : 'confirm',
     name : 'contributors',
     message : 'Show contributors ?',
     when: function(answers) {
-      return (answers.advancedCustomization == 'Custom')
+      return (answers.settings == 'Custom')
     },
     default: true
   },
   {
     type : 'confirm',
-    name : 'updateableController',
+    name : 'allowTransferController',
     message: 'Possibility to update the token sale controller',
     when: function(answers) {
-      return (answers.advancedCustomization == 'Custom')
+      return (answers.settings == 'Custom')
     },
     default: false
+  },
+  {
+    type: 'confirm',
+    name: 'lockableTransfers',
+    message: 'This settings defines whether token transfers can be locked or not',
+    when: function(answers) {
+      return (answers.settings == 'Custom')
+    }
   },
   {
     type: 'confirm',
     name: 'proxy',
     message: 'Display proxy balance and proxy total supply of corresponding token ?',
     when: function(answers) {
-      return (answers.advancedCustomization == 'Custom')
+      return (answers.settings == 'Custom')
     },
     default: true
-  },
+  }
 ]
 
 
@@ -102,16 +161,10 @@ const tokenSale = [
     validate: validator.isPositiveNumber
   },
   {
-    type: 'datetime',
-    name : 'startTime',
-    message: 'Please input beginning date',
-    format: ['m', '/', 'd', '/', 'yy', ' ', 'h', ':', 'MM', ' ', 'TT']
-  },
-  {
-    type : 'datetime',
-    name : 'endTime',
-    message : 'Please input ending date',
-    format: ['m', '/', 'd', '/', 'yy', ' ', 'h', ':', 'MM', ' ', 'TT']
+    type: 'input',
+    name : 'minimumInvestment',
+    message : 'Please input minimum investment (0 to accept any transaction)',
+    validate: validator.isPositiveNumber
   },
   {
     type : 'input',
@@ -121,7 +174,7 @@ const tokenSale = [
   }
 ]
 
-const tokenSaleType = [
+const tokenSaleCap = [
   {
     type: 'list',
     name: 'type',
@@ -139,33 +192,42 @@ const tokenSaleType = [
   }
 ]
 
-const presale = [
+const tokenSaleTimeLimits = [
   {
-    type : 'input',
-    name : 'cap',
-    message : 'Please input token hard cap',
-    validate: validator.isValidCap
+    type: 'confirm',
+    name: 'timed',
+    message: 'Choose whether the tokensale is limited in time (recommended)',
+    default: true
   },
   {
-    type: 'input',
-    name: 'minimumInvestment',
-    message: 'Please input minimum investment (in wei)',
-    validate: validator.isPositiveNumber
+    type: 'datetime',
+    name : 'startTime',
+    message: 'Please input beginning date',
+    format: ['m', '/', 'd', '/', 'yy', ' ', 'h', ':', 'MM', ' ', 'TT'],
+    when: function(answers) {
+      return (answers.timed == true)
+    }
   },
   {
-    type : 'input',
-    name : 'rate',
-    message : 'Please input token rate (number of tokens received per ether)',
-    validate: validator.isPositiveNumber
-  },
-  {
-    type : 'input',
-    name : 'wallet',
-    message : 'Please input ethereum wallet address (to which tokensale funds will be forwarded)',
-    validate: validator.isValidAddress
+    type : 'datetime',
+    name : 'endTime',
+    message : 'Please input ending date',
+    format: ['m', '/', 'd', '/', 'yy', ' ', 'h', ':', 'MM', ' ', 'TT'],
+    when: function(answers) {
+      return (answers.timed == true)
+    }
   }
 ]
 
+
+const advancedOptions = [
+  {
+    type: 'list',
+    name: 'lockableTransfers',
+    message: 'Choose whether the tokensale controller can lock the transfers or not',
+    choices: ['Transfers can be locked', 'Transfers can not be locked']
+  }
+]
 
 const wallet = [
   {
@@ -216,7 +278,6 @@ const contractOptionsList = (list = []) => {
 module.exports = {
   token,
   tokenSale,
-  presale,
   wallet,
   categories,
   compilerMenu,
@@ -224,7 +285,13 @@ module.exports = {
   contractList,
   contractCheckboxList,
   contractOptionsList,
+  tokenMenu,
+  tokenSaleMenu,
   tokenType,
-  tokenSaleType,
-  tokenSaleAdditionalConfiguration
+  tokenSale,
+  tokenSaleCap,
+  tokenSaleTimeLimits,
+  advancedOptions,
+  tokenSaleAdvancedConfiguration,
+  tokenAdvancedConfiguration
 }

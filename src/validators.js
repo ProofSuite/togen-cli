@@ -64,18 +64,34 @@ const isValidName = function(value) {
 }
 
 const isPositiveNumber =function(value) {
-  if (value > 0) {
+  if (parseInt(value) != NaN && value > 0) {
     return true;
   } else {
     return 'Please enter a positive number'
   }
 }
 
-const isString = function() {
-  if (String(value)) {
+const isString = function(value) {
+  if (typeof value == "string") {
     return true;
   } else {
     return 'The value must be a string'
+  }
+}
+
+const isNumber = function(value) {
+  if (typeof value == "number") {
+    return true
+  } else {
+    return false
+  }
+}
+
+const isBoolean = function(value) {
+  if (typeof value == "boolean") {
+    return true
+  } else {
+    return false
   }
 }
 
@@ -99,7 +115,9 @@ module.exports = {
   isValidDecimals,
   isValidTokenType,
   isSet,
-  isTrue
+  isTrue,
+  isNumber,
+  isBoolean
 }
 
 
