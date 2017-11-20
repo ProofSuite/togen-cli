@@ -11,7 +11,6 @@ class Generator {
     if (configuration.presale) this.generatePresale(configuration.presale)
   }
 
-
   //TODO refactor imports and parentClasses, perhaps call them directly in the template file ?
   generateTokenSale(parameters) {
     parameters.imports = parameters.resolveImports();
