@@ -1,24 +1,23 @@
 ;
 
-require('./src/utils.js');
-const questions = require('./src/questions');
+require('./lib/utils.js');
+const questions = require('./lib/questions');
 const command = require('inquirer');
 const clear = require('clear');
 const Table = require('cli-table2');
 const config = require('./config.js');
-const assembler = require('./src/assembler/index.js');
+const assembler = require('./lib/assembler/index.js');
 
 command.registerPrompt('datetime', require('inquirer-datepicker-prompt'));
 
-const Configuration = require('./src/configuration/configuration.js');
-const Compiler = require('./src/compiler.js');
-const Display = require('./src/display.js')
-;
+const Options = require('./lib/configuration/configuration.js');
+const Compiler = require('./lib/compiler.js');
+const Display = require('./lib/display.js');
 const configuration = new Configuration();
 const compiler = new Compiler(config.artifactsFolder);
 const display = new Display(configuration);
 
-main();
+// main();
 
 async function main() {
   await showMainMenu();
@@ -57,11 +56,11 @@ async function showConfigurationMenu() {
     display.currentConfiguration(configuration);
     await display.waitUntilKeyPress();
   } else if (options.choice === 'Save Configuration') {
-    configuration.saveConfiguration();
+    configuration.save();
     display.message.configurationSaved();
     await display.waitUntilKeyPress();
   } else if (options.choice === 'Load Previous Configuration') {
-    configuration.loadConfiguration();
+    configuration.load();
     display.message.configurationLoaded();
     await display.waitUntilKeyPress();
   } else if (options.choice === 'Back') {
@@ -125,7 +124,7 @@ async function showPresaleTokenMenu() {
 
   if (choice === 'Base Configuration') {
     display.message.paramsRequest('Presale Token');
-    await configuration.presaleToken.updateBaseConfiguration();
+    await configuration.presaleToken.updateBasicOptions();
     await showPresaleTokenMenu();
 
   } else if (choice === 'Token Type') {
@@ -134,7 +133,7 @@ async function showPresaleTokenMenu() {
     await showPresaleTokenMenu();
 
   } else if (choice === 'Advanced Configuration') {
-    await configuration.presaleToken.updateAdvancedConfiguration();
+    await configuration.presaleToken.updateAdvancedOptions();
     await showPresaleTokenMenu();
 
   } else if (choice === 'Display Current Configuration') {
@@ -153,7 +152,7 @@ async function showTokenMenu() {
 
   if (choice === 'Base Configuration') {
     display.message.paramsRequest('Token');
-    await configuration.token.updateBaseConfiguration();
+    await configuration.token.updateBasicOptions();
     await showTokenMenu();
 
   } else if (choice === 'Token Type') {
@@ -162,7 +161,7 @@ async function showTokenMenu() {
     await showTokenMenu();
 
   } else if (choice === 'Advanced Configuration') {
-    await configuration.token.updateAdvancedConfiguration();
+    await configuration.token.updateAdvancedOptions();
     await showTokenMenu();
 
   } else if (choice === 'Display Current Configuration') {
@@ -181,7 +180,7 @@ async function showTokenSaleMenu() {
 
   if (choice === 'Base Configuration') {
     display.message.paramsRequest('Presale');
-    await configuration.tokenSale.updateBaseConfiguration();
+    await configuration.tokenSale.updateBasicOptions();
     await showTokenSaleMenu();
 
   } else if (choice === 'Cap Configuration') {
@@ -195,7 +194,7 @@ async function showTokenSaleMenu() {
     await showTokenSaleMenu();
 
   } else if (choice === 'Advanced Configuration') {
-    await configuration.tokenSale.updateAdvancedConfiguration();
+    await configuration.tokenSale.updateAdvancedOptions();
     await showTokenSaleMenu();
 
   } else if (choice === 'Display Current Configuration') {
@@ -214,7 +213,7 @@ async function showPresaleMenu() {
 
   if (choice === 'Base Configuration') {
     display.message.paramsRequest('Presale');
-    await configuration.presale.updateBaseConfiguration();
+    await configuration.presale.updateBasicOptions();
     await showPresaleMenu();
 
   } else if (choice === 'Cap Configuration') {
@@ -228,7 +227,7 @@ async function showPresaleMenu() {
     await showPresaleMenu();
 
   } else if (choice === 'Advanced Configuration') {
-    await configuration.presale.updateAdvancedConfiguration();
+    await configuration.presale.updateAdvancedOptions();
     await showPresaleMenu();
 
   } else if (choice === 'Display Current Configuration') {
@@ -293,3 +292,4 @@ async function showContractMenu({ additionalFields = [] }) {
   return choice;
 }
 
+module.exports = { main }

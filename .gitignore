@@ -58,8 +58,8 @@ typings/
 .env
 
 # smart contracts configuration
-src/contracts/solidity/*.sol
-src/contracts/configuration.json
+lib/contracts/solidity/*.sol
+lib/contracts/configuration.json
 
 
 
