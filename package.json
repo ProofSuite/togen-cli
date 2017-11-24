@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "beautify": "0.0.8",
+    "catchify": "~2.6.1",
     "clear": "0.0.1",
     "cli-table2": "~0.2.0",
     "clikey": "~1.0.2",
