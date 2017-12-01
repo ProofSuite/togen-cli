@@ -1,4 +1,4 @@
-;
+
 
 require('./lib/utils.js');
 const questions = require('./lib/questions');
@@ -31,7 +31,7 @@ async function showMainMenu() {
   if (choice === 'Configure Contracts') {
     await showConfigurationMenu();
   } else if (choice === 'Display Contract Configuration') {
-    display.currentConfiguration(configuration);
+    display.showConfiguration(configuration);
     await display.waitUntilKeyPress();
     await showMainMenu();
   } else if (choice === 'Build Contracts') {
@@ -53,7 +53,7 @@ async function showConfigurationMenu() {
   if (options.choice === 'Edit Configuration') {
     await showContractSelectionMenu();
   } else if (options.choice === 'Display Current Configuration') {
-    display.currentConfiguration(configuration);
+    display.showConfiguration(configuration);
     await display.waitUntilKeyPress();
   } else if (options.choice === 'Save Configuration') {
     configuration.save();
@@ -106,7 +106,7 @@ async function showContractConfigurationMenu() {
     await requestWalletParameters();
 
   } else if (choice === 'Display Contract Configuration') {
-    display.currentConfiguration(configuration);
+    display.showConfiguration(configuration);
     await display.waitUntilKeyPress();
     await showContractConfigurationMenu();
 
@@ -137,7 +137,7 @@ async function showPresaleTokenMenu() {
     await showPresaleTokenMenu();
 
   } else if (choice === 'Display Current Configuration') {
-    display.currentConfiguration(configuration);
+    display.showConfiguration(configuration);
     await display.waitUntilKeyPress();
     await showPresaleTokenMenu();
 
@@ -165,7 +165,7 @@ async function showTokenMenu() {
     await showTokenMenu();
 
   } else if (choice === 'Display Current Configuration') {
-    display.currentConfiguration(configuration);
+    display.showConfiguration(configuration);
     await display.waitUntilKeyPress();
     await showTokenMenu();
 
@@ -190,7 +190,7 @@ async function showTokenSaleMenu() {
 
   } else if (choice === 'Timing Configuration') {
     display.message.paramsRequest('Timing Configuration');
-    await configuration.tokenSale.updateTimed();
+    await configuration.tokenSale.updateTimeLimits();
     await showTokenSaleMenu();
 
   } else if (choice === 'Advanced Configuration') {
@@ -198,7 +198,7 @@ async function showTokenSaleMenu() {
     await showTokenSaleMenu();
 
   } else if (choice === 'Display Current Configuration') {
-    display.currentConfiguration(configuration);
+    display.showConfiguration(configuration);
     await display.waitUntilKeyPress();
     await showTokenSaleMenu();
 
@@ -231,7 +231,7 @@ async function showPresaleMenu() {
     await showPresaleMenu();
 
   } else if (choice === 'Display Current Configuration') {
-    display.currentConfiguration(configuration);
+    display.showConfiguration(configuration);
     await display.waitUntilKeyPress();
     await showPresaleMenu();
 
@@ -284,7 +284,6 @@ async function showCompilerMenu() {
 
 
 async function showContractMenu({ additionalFields = [] }) {
-  console.log(additionalFields);
   const optionsList = configuration.getIncludedContracts().uncamelize();
   additionalFields.forEach((field) => { optionsList.push(field); });
   const menu = questions.contractOptionsList(optionsList);
