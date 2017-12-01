@@ -1,6 +1,40 @@
-# Token Sale Generator CLI (Beta)
 
-The Token Sale Generator CLI is an commandline tool to configure, generate, compile and deploy tokensale smart-contract infrastructures.
+
+# togen : Token and Token Sale Generator CLI (Beta)
+
+
+The togen Token Sale Generator CLI is an commandline tool to configure, generate, compile and deploy tokensale smart-contract infrastructures.
+
+
+
+
+## Modules
+
+
+**Configure Contracts**
+
+Choose which contracts you will be assembling, compiling and deploying. Answer the different questions to configure tokensale parameters (number of tokens, cap, etc.)
+
+
+**Display Contract Configuration**
+
+Quickly visualize which contracts are included and their configuration
+
+
+**Assemble Contracts**
+
+Instantly generate solidity code corresponding your tokensale configuration. You need to finish configuration before proceeding to build your contracts.
+
+
+**Compile Contracts (under development)**
+
+Compile the contracts into bytecode.
+
+
+**Deploy Contracts (under development)**
+
+Deploy contracts via your own client or simply use Infura to seamlessly deploy contracts to the network of your choice
+
 
 ## Requirements
 
@@ -8,99 +42,196 @@ The Token Sale Generator CLI is an commandline tool to configure, generate, comp
 * Node (version 8.7.0 required for the testing environment)
 
 
+
 ## Install
 
-After you've installed the correct version of node, install local node packages:
+An early version of the module has been published via npm. It is however an early release and we recommend using the development version of the CLI to be able to benefit from the latest changes.
+
+To install the npm published version: 
 
 ```
-npm install
+npm install -g togen
 ```
+
+To install the developer version with the latest changes: 
+
+* Clone the package 
+
+```
+git clone https://github.com/ProofSuite/TokenSaleGeneratorCLI
+```
+
+* Install the package globally
+
+```
+cd TokenSaleGeneratorCLI
+npm install -g .
+```
+
 
 ## Usage
 
-Simply run the command line utility with npm:
+Create your togen folder (creates a local directory with the required smart-contracts dependencies and settings files).
 
 ```
-npm run start
+togen init --name togen-folder
+cd togen-folder
 ```
 
-## Modules
+List of the togen sub-commands: 
 
-* Configure Contracts
-Choose which contracts you will be assembling, compiling and deploying. Answer the different questions to configure tokensale parameters (number of tokens, cap, etc.)
+   **Initialize a togen directory**
+   
+   > `togen init [--name <name>]`
+   >* --name: Enter togen folder name (optional)
 
-* Display Contract Configuration
-Quickly visualize which contracts are included and their configuration
 
-* Build Contracts
-Instantly generate solidity code corresponding your tokensale configuration. You need to finish configuration before proceeding to build your contracts.
+   **Open an interactive togen session**
+   
+   > `togen console`
 
-* Compile Contracts (under development)
-Compile the contracts into bytecode.
 
-* Deploy Contracts (under development)
-Deploy contracts via your own client or simply use Infura to seamlessly deploy contracts to the network of your choice
+   **Configure contract parameters:**
+   
+   > `togen configure [ --show |--edit | --interactive ] [ --file <file> | --default ]`
+   > * --show: Show configuration (from current project, file or default configuration)
+   > * --edit: Edit configuration. If the file option is used, the file configuration will replace the project configuration
+   > * --interactive: Edit configuration interactively
+
+
+ **Assemble contract templates**
+
+ > `togen assemble [--file <filepath>] [--contracts <names>] [--output <path>] [ --print ]`
+ > * --file: Assemble contract from file configuration (if the file is not provided, the configuration will be current project configuration)
+ > * --contracts: Only assemble the provided contracts (the settings file is still required)
+ > * --output: Outputs the resulting solidity code to the given path
+
+**Compile one or several smart contracts**
+
+ > `compile [--file filepath] [--contract <names>] [--output <path>] [--bytecode | --interface]`
+ > * --file: Compiles contract from file configuration (if the file is not provided, the configuration will be the current project configuration)
+ > * --contracts: Only compiles the provided contracts (the settings file is still required)
+ > * --output: Outputs the resulting compile information to the given path
+ > * --bytecode: Print contracts bytecode
+ > * --interface: Print contracts interface
+
+
+
+
+## Examples 
+
+Show current configuration
+```
+togen configure --show
+```
+
+Show file configuration
+```
+togen configure --show --file <path/to/file.json>
+```
+
+Show the default configuration 
+```
+togen configure --show --default
+```
+
+Edit your configuration interactively
+```
+togen configure --edit
+```
+
+Edit your configuration with a settings file
+```
+togen configure --edit --file <path/to/file.json>
+```
+
+Open interactive togen console
+```
+togen console
+```
+
+Assemble contracts (local configuration)
+```
+togen assemble
+```
+
+Assemble contracts from a specific configuration file 
+```
+togen assemble --file <path/to/settings.json>
+```
+
+
+Assemble a specific contract within your configuration (local configuration)
+```
+togen assemble --contracts Presale
+```
+
+Compile local configuration/contracts
+```
+togen compile
+```
+
+Assemble and compile from a specific configuration file
+```
+togen assemble --file <path/to/settings.json>
+```
+
+
+## Current Features
+
+The togen token/tokensale generator CLI project is still in its infancy. Here are the current features for both tokensale and token contracts: 
+
+Tokens: 
+
+* Token Name
+* Token Symbol
+* Token Decimals
+* Token Standard (ERC20, MINIME. The next step is to included ERC223 + Open Zeppelin additional personalization)
+* Allow transfers or not
+* Allow locking transfers or not
+
+
+Tokensale: 
+
+* Token Price
+* Minimum Investment
+* Tokensale Wallet
+* Tokensale starting/ending date
+* Tokensale Cap
+* Token Balance/Supply proxy
+* etc.
+
 
 
 ## Contributing
 
-The Token Sale Generator CLI project is still in its infancy. We welcome even the smallest contributions.
+The togen project is fully open-sourced and we welcome any contributions, even the smallest
 
-Below is a short and non-exhaustive list of features that we wish to add
 
-### Code style:
-- Replace hardcoded values by importing them from the config file
-- Normalize file paths to account for windows
-- Re-organize modules
-- promiseAll instead of sequential awaits
-- etc.
 
-### Tests:
-- Write unit tests
 
-### Flow:
-- Improved flow (take into account the additional complexity from upcoming features)
-- Delete solidity on generation of new files
-- Replace hardcoded filenames by a directory lookup
 
-### Validations:
-- Improved validation patterns based on regular expressions
-- Improved validation based on logic (startDate < endDate)
 
-### Smart-Contracts:
-- Add different models of token sale (capped, uncapped, dutch auction, etc.)
-- Add different models of tokens (standard minted token, simple ERC20 token, non-transferable token)
-- Add modularity based on smart-contract inheritance (Ownable, Controllable, etc.)
 
-### Display:
-- Add visual cues on whether a configuration is complete or incomplete (green check/red cross)
-- Improve messages/visuals
 
-### Configuration:
-- Save and Load smart-contract configuration
 
-### Token and Presale Token:
-- Non-transferable token configuration
-- Lockable transfers configuration
-- Approve/Call configuration
-- Mintable or pre-generated
 
-### Compilation:
-- Integrate compilation module to the rest of the CLI
-- Integrate flattening module to the compilation
-- Flattening (=replacing imports by files) should be graph-based (e.g. imports shouldn)'t have to be in the right order to compile correctly)
-- Add support for constructor arguments
 
-### Presale and Tokensale:
-- Ending date and starting date options for the presale
-- Initial Token Allocation Configuration
-- Price bonuses
-- etc.
 
-### Deployment:
-- Flexible deployment module based on truffle-deployer
-- Automatic transfer of the token control to the tokensale
 
-### Bugs:
-- Currently there is a bug when doing a configuration and going to the configuration menu a second time, the output is displayed twice
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
