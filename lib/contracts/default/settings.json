@@ -53,7 +53,9 @@
     "contributors": false,
     "proxy": false
   },
-  "wallet": {},
+  "wallet": {
+    "type": "wallet"
+  },
   "includedContracts": {
     "token": false,
     "tokenSale": false,

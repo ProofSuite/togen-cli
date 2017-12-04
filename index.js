@@ -56,9 +56,17 @@ async function showConfigurationMenu() {
     display.showConfiguration(configuration);
     await display.waitUntilKeyPress();
   } else if (options.choice === 'Save Configuration') {
-    configuration.save();
-    display.message.configurationSaved();
-    await display.waitUntilKeyPress();
+    try {
+      this.settings.save();
+      display.message.configurationSaved();
+      await display.waitUntilKeyPress();
+    }
+    catch(e) {
+      if (e instanceof Error) {
+        display.message.configurationNotSaved();
+        await display.waitUntilKeyPress();
+      }
+    }
   } else if (options.choice === 'Load Previous Configuration') {
     configuration.load();
     display.message.configurationLoaded();
@@ -74,7 +82,7 @@ async function showConfigurationMenu() {
 // TODO replace the hardcoded list of contracts by parsing the files in the templates folder
 async function showContractSelectionMenu() {
   display.message.contractSelectionMenu();
-  const contractFiles = ['Presale', 'Presale Token', 'Token', 'Token Sale', 'Multisig Wallet'];
+  const contractFiles = ['Presale', 'Presale Token', 'Token', 'Token Sale', 'Wallet'];
   const contracts = questions.contractCheckboxList(contractFiles);
 
   const { choice } = await command.prompt(contracts);
@@ -102,7 +110,7 @@ async function showContractConfigurationMenu() {
   } else if (choice === 'TokenSale') {
     await showTokenSaleMenu();
 
-  } else if (choice === 'Multisig Wallet') {
+  } else if (choice === 'Wallet') {
     await requestWalletParameters();
 
   } else if (choice === 'Display Contract Configuration') {

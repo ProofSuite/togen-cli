@@ -57,9 +57,5 @@ typings/
 # dotenv environment variables file
 .env
 
-# smart contracts configuration
-lib/contracts/solidity/*.sol
-lib/contracts/configuration.json
-
 
 
