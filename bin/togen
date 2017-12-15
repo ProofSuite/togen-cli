@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 var Cmd = require('../lib/cmd');
 var cli = new Cmd();
+
 cli.process(process.argv);
 

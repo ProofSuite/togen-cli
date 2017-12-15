@@ -1,0 +1,7 @@
+{
+  "infuraToken": "",
+  "defaultWallet": "",
+  "defaultNetwork": "rinkeby",
+  "defaultGasLimit": "4000000",
+  "defaultGasPrice": "20"
+}
