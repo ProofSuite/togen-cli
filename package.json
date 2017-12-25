@@ -43,6 +43,7 @@
     "truffle-deployer": "~2.0.0",
     "truffle-resolver": "~4.0.1",
     "tsort": "0.0.1",
+    "underscore": "~1.8.3",
     "web3": "~1.0.0-beta.24"
   },
   "devDependencies": {
