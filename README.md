@@ -47,15 +47,15 @@ Deploy contracts via your own client or simply use Infura to seamlessly deploy c
 
 An early version of the module has been published via npm. It is however an early release and we recommend using the development version of the CLI to be able to benefit from the latest changes.
 
-To install the npm published version: 
+To install the npm published version:
 
 ```
 npm install -g togen
 ```
 
-To install the developer version with the latest changes: 
+To install the developer version with the latest changes:
 
-* Clone the package 
+* Clone the package
 
 ```
 git clone https://github.com/ProofSuite/TokenSaleGeneratorCLI
@@ -78,21 +78,21 @@ togen init --name togen-folder
 cd togen-folder
 ```
 
-List of the togen sub-commands: 
+List of the togen sub-commands:
 
    **Initialize a togen directory**
-   
+
    > `togen init [--name <name>]`
    >* --name: Enter togen folder name (optional)
 
 
    **Open an interactive togen session**
-   
+
    > `togen console`
 
 
    **Configure contract parameters:**
-   
+
    > `togen configure [ --show |--edit | --interactive ] [ --file <file> | --default ]`
    > * --show: Show configuration (from current project, file or default configuration)
    > * --edit: Edit configuration. If the file option is used, the file configuration will replace the project configuration
@@ -118,7 +118,7 @@ List of the togen sub-commands:
 
 
 
-## Examples 
+## Examples
 
 Show current configuration
 ```
@@ -130,7 +130,7 @@ Show file configuration
 togen configure --show --file <path/to/file.json>
 ```
 
-Show the default configuration 
+Show the default configuration
 ```
 togen configure --show --default
 ```
@@ -155,7 +155,7 @@ Assemble contracts (local configuration)
 togen assemble
 ```
 
-Assemble contracts from a specific configuration file 
+Assemble contracts from a specific configuration file
 ```
 togen assemble --file <path/to/settings.json>
 ```
@@ -179,9 +179,9 @@ togen assemble --file <path/to/settings.json>
 
 ## Current Features
 
-The togen token/tokensale generator CLI project is still in its infancy. Here are the current features for both tokensale and token contracts: 
+The togen token/tokensale generator CLI project is still in its infancy. Here are the current features for both tokensale and token contracts:
 
-Tokens: 
+Tokens:
 
 * Token Name
 * Token Symbol
@@ -191,7 +191,7 @@ Tokens:
 * Allow locking transfers or not
 
 
-Tokensale: 
+Tokensale:
 
 * Token Price
 * Minimum Investment
@@ -200,6 +200,20 @@ Tokensale:
 * Tokensale Cap
 * Token Balance/Supply proxy
 * etc.
+
+
+Planned Features:
+- select very different types of contract
+- more complex deployments ?
+- inspect list of transactions for a wallet (and link to etherscan)
+- put contract from the editor (deployment arguments ? - from the command line)
+- make sure deployment works for contracts with constructor arguments
+- create a system where the deployer records the contracts that have been deployed.
+  the deployment menu shows the contracts that have been compiled. each contracts leads
+  to a submenu. if a contract has been compiled in the past, it shows a deployed list of contracts
+  with links to etherscan. if not, a simple "has not been compiled yet"
+- fix the options and settings wording (+ maybe additional fileSettings?)
+- add a message that the previous configuration has been loaded. + figure out the save configuration flow
 
 
 
